@@ -1,0 +1,108 @@
+{
+  "entities": {
+    "projects": {
+      "title": "string",
+      "slug": "string",
+      "shortDescription": "string",
+      "fullDescription": "string",
+      "thumbnail": "string",
+      "gallery": "array",
+      "category": "string",
+      "technologies": "array",
+      "githubUrl": "string",
+      "liveUrl": "string",
+      "featured": "boolean",
+      "published": "boolean",
+      "order": "number",
+      "createdAt": "timestamp"
+    },
+    "blogs": {
+      "title": "string",
+      "slug": "string",
+      "excerpt": "string",
+      "content": "string",
+      "featuredImage": "string",
+      "category": "string",
+      "tags": "array",
+      "publishedAt": "string",
+      "readTime": "string",
+      "status": "string",
+      "featured": "boolean",
+      "views": "number"
+    },
+    "skills": {
+      "name": "string",
+      "category": "string",
+      "level": "number",
+      "icon": "string",
+      "order": "number"
+    },
+    "experiences": {
+      "company": "string",
+      "role": "string",
+      "location": "string",
+      "startDate": "string",
+      "endDate": "string",
+      "description": "string",
+      "responsibilities": "array",
+      "technologies": "array",
+      "logo": "string",
+      "isCurrent": "boolean",
+      "order": "number"
+    },
+    "education": {
+      "institution": "string",
+      "degree": "string",
+      "startDate": "string",
+      "endDate": "string",
+      "description": "string",
+      "achievements": "array",
+      "order": "number"
+    },
+    "certificates": {
+      "title": "string",
+      "issuer": "string",
+      "issueDate": "string",
+      "credentialId": "string",
+      "credentialUrl": "string",
+      "image": "string",
+      "featured": "boolean"
+    },
+    "services": {
+      "title": "string",
+      "description": "string",
+      "icon": "string",
+      "order": "number"
+    },
+    "testimonials": {
+      "quote": "string",
+      "name": "string",
+      "role": "string",
+      "company": "string",
+      "avatar": "string",
+      "order": "number"
+    },
+    "contact_messages": {
+      "fullName": "string",
+      "phoneNumber": "string",
+      "email": "string",
+      "subject": "string",
+      "message": "string",
+      "status": "string",
+      "createdAt": "timestamp"
+    },
+    "site_settings": {
+      "name": "string",
+      "title": "string",
+      "bio": "string",
+      "aboutText": "string",
+      "phone": "string",
+      "email": "string",
+      "location": "string",
+      "cvUrl": "string",
+      "videoUrl": "string",
+      "socialLinks": "map",
+      "stats": "map"
+    }
+  }
+}

@@ -1,0 +1,6 @@
+{
+  "name": "Sift - Full-Stack Portfolio CMS",
+  "description": "Full-stack UI/UX Designer & Developer portfolio CMS with Node.js/Express backend, Firestore database, admin management panel, and modern dark luxury aesthetic.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
