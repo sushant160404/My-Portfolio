@@ -10,10 +10,10 @@ app.use(express.json());
 // In-memory / Server API backup endpoints to support REST API specs
 // The client also syncs directly with Firestore for real-time responsiveness
 let siteSettings = {
-  name: 'Alex Robert',
-  title: 'A UI/UX DESIGNER & DEVELOPER',
+  name: 'Sushant Namurte',
+  title: 'A JUNIOR SOFTWARE ENGINEER & DEVELOPER',
   subtitle: 'As a dedicated professional with a passion for Sift, I bring 10+ years of experience in ui/ux design & development throughout best of my career.',
-  aboutTitle: 'BEST UI/UX DESIGNER & DEVELOPER IN USA',
+  aboutTitle: 'BEST JUNIOR SOFTWARE ENGINEER & DEVELOPER IN USA',
   aboutText: 'At Sift, we understand that success is just about delivering a product - it\'s about building relationships and making a meaningful impact of client.',
   phone: '281-789-6642',
   email: 'info@siftmedia.com',
@@ -121,8 +121,8 @@ app.post('/api/chat', async (req, res) => {
     const selectedModel = model || (siteSettings as any).groqModel || 'llama-3.3-70b-versatile';
 
     const contextPrompt = portfolioContext || `
-You are the official AI Portfolio Assistant for Alex Robert (Sift Media).
-Alex Robert is a Lead UI/UX Designer & Full-Stack Developer with 10+ years of experience.
+You are the official AI Portfolio Assistant for Sushant Namurte (Sift Media).
+Sushant Namurte is a Lead Junior Software Engineer & Full-Stack Developer with 10+ years of experience.
 Contact Email: ${siteSettings.email || 'info@siftmedia.com'}
 Phone: ${siteSettings.phone || '281-789-6642'}
 Location: ${siteSettings.location || 'New York, NY, USA'}
@@ -130,7 +130,7 @@ Services Offered: UI/UX Design, Web Application Development, Full-Stack Architec
 Stats: ${siteSettings.stats?.yearsExperience || '10+'} Experience, ${siteSettings.stats?.projectsCompleted || '12K'} Projects completed, ${siteSettings.stats?.satisfiedCustomers || '10K'} Clients.
 
 Your Role:
-1. Answer visitor questions about Alex Robert, services, skills, portfolio projects, and availability.
+1. Answer visitor questions about Sushant Namurte, services, skills, portfolio projects, and availability.
 2. Maintain a friendly, professional, and knowledgeable tone.
 3. Keep responses clean, concise, and structured with bullet points where appropriate.
 4. Encourage visitors to use the Contact Form or email Alex directly for project inquiries.
@@ -234,7 +234,7 @@ app.post('/api/chat/test-key', async (req, res) => {
 app.post('/api/auth/login', (req, res) => {
   const { username, password } = req.body;
   if (password === 'admin123' || password === 'sift2026' || username === 'admin') {
-    res.json({ success: true, token: 'mock-jwt-token-sift-admin', user: { name: 'Alex Robert', role: 'admin' } });
+    res.json({ success: true, token: 'mock-jwt-token-sift-admin', user: { name: 'Sushant Namurte', role: 'admin' } });
   } else {
     res.status(401).json({ error: 'Invalid admin credentials' });
   }

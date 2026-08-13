@@ -27,7 +27,7 @@ export const AboutSection: React.FC<AboutSectionProps> = ({ settings }) => {
             </div>
 
             <h2 className="text-3xl sm:text-5xl font-black uppercase tracking-tight text-white leading-tight">
-              BEST UI/UX DESIGNER <br />
+              BEST JUNIOR SOFTWARE ENGINEER <br />
               <span className="font-serif italic text-neutral-300 font-light">& DEVELOPER</span> IN USA
             </h2>
 

@@ -230,7 +230,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
 
   // Seed / Reset Database with Sift Default Data
   const handleSeedDefaults = async () => {
-    if (!window.confirm('Seed database with original SIFT Alex Robert portfolio data?')) return;
+    if (!window.confirm('Seed database with original SIFT Sushant Namurte portfolio data?')) return;
     setSeeding(true);
     try {
       // 1. Projects
@@ -759,7 +759,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
               A
             </div>
             <div className="truncate">
-              <p className="text-xs font-bold text-white truncate">Alex Robert</p>
+              <p className="text-xs font-bold text-white truncate">Sushant Namurte</p>
               <p className="text-[10px] text-neutral-500 font-mono truncate">admin@siftmedia.com</p>
             </div>
           </div>
@@ -2975,7 +2975,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                       rows={4}
                       value={siteSettingsForm.chatbotSystemPrompt || ''}
                       onChange={(e) => setSiteSettingsForm({ ...siteSettingsForm, chatbotSystemPrompt: e.target.value })}
-                      placeholder="You are the official AI Portfolio Assistant for Alex Robert..."
+                      placeholder="You are the official AI Portfolio Assistant for Sushant Namurte..."
                       className="w-full bg-[#121212] border border-white/10 rounded-xl p-3 text-xs text-white font-mono focus:outline-none focus:border-[#CCFF00]"
                     />
                     <span className="text-[10px] text-neutral-500 mt-1 block">

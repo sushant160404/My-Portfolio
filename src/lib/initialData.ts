@@ -11,10 +11,10 @@ import {
 } from '../types';
 
 export const INITIAL_SETTINGS: SiteSettings = {
-  name: 'Alex Robert',
-  title: 'A UI/UX DESIGNER & DEVELOPER',
+  name: 'Sushant Namurte',
+  title: 'A JUNIOR SOFTWARE ENGINEER & DEVELOPER',
   subtitle: 'As a dedicated professional with a passion for Sift, I bring 10+ years of experience in ui/ux design & development throughout best of my career.',
-  aboutTitle: 'BEST UI/UX DESIGNER & DEVELOPER IN USA',
+  aboutTitle: 'BEST JUNIOR SOFTWARE ENGINEER & DEVELOPER IN USA',
   aboutText: 'At Sift, we understand that success is just about delivering a product - it\'s about building relationships and making a meaningful impact of client.',
   phone: '281-789-6642',
   email: 'info@siftmedia.com',
@@ -51,8 +51,8 @@ export const INITIAL_SETTINGS: SiteSettings = {
   groqModel: 'llama-3.3-70b-versatile',
   chatbotEnabled: true,
   chatbotName: 'Sift AI Assistant',
-  chatbotGreeting: 'Hello! I am Alex\'s AI Portfolio Assistant. How can I help you today? Ask me about Alex\'s skills, projects, UI/UX services, or hiring availability!',
-  chatbotSystemPrompt: 'You are the official AI Portfolio Assistant for Alex Robert (Sift Media). You are helpful, professional, friendly, and knowledgeable. Answer questions accurately based on Alex\'s portfolio details (services, projects, skills, contact info). Keep responses clear, concise, and beautifully formatted.'
+  chatbotGreeting: 'Hello! I am Sushant\'s AI Portfolio Assistant. How can I help you today? Ask me about Sushant\'s skills, projects, UI/UX services, or hiring availability!',
+  chatbotSystemPrompt: 'You are the official AI Portfolio Assistant for Sushant Namurte (Sift Media). You are helpful, professional, friendly, and knowledgeable. Answer questions accurately based on Sushant\'s portfolio details (services, projects, skills, contact info). Keep responses clear, concise, and beautifully formatted.'
 };
 
 export const INITIAL_SERVICES: Service[] = [
@@ -198,7 +198,7 @@ export const INITIAL_TESTIMONIALS: Testimonial[] = [
   },
   {
     id: 't2',
-    quote: 'Alex Robert transformed our cluttered legacy interface into a crisp, ultra-intuitive dark SaaS platform. Our user engagement skyrocketed by 140% in the first quarter post-launch!',
+    quote: 'Sushant Namurte transformed our cluttered legacy interface into a crisp, ultra-intuitive dark SaaS platform. Our user engagement skyrocketed by 140% in the first quarter post-launch!',
     name: 'Sarah Jenkins',
     role: 'Head of Product, Spherule',
     company: 'Spherule',
@@ -220,7 +220,7 @@ export const INITIAL_EXPERIENCES: Experience[] = [
   {
     id: 'e1',
     company: 'Sift Digital Studio',
-    role: 'Lead UI/UX Designer & Senior Front-End Developer',
+    role: 'Lead Junior Software Engineer & Senior Front-End Developer',
     location: 'New York, USA',
     startDate: '2021',
     endDate: 'Present',
@@ -286,7 +286,7 @@ export const INITIAL_BLOGS: Blog[] = [
     readTime: '7 min read',
     featured: true,
     views: 980,
-    seoTitle: 'Building Scalable REST APIs with Node.js & Express | Alex Robert',
+    seoTitle: 'Building Scalable REST APIs with Node.js & Express | Sushant Namurte',
     metaDescription: 'Comprehensive guide to building enterprise Node.js & Express APIs with JWT security, connection pooling, and RESTful routing best practices.',
     keywords: ['Node.js REST API', 'Express.js Backend', 'PostgreSQL Pooling', 'Web API Security'],
     canonicalUrl: 'https://siftmedia.com/blog/building-scalable-full-stack-rest-apis',
