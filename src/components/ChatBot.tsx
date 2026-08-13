@@ -41,7 +41,7 @@ export const ChatBot: React.FC<ChatBotProps> = ({
   const [unreadBadge, setUnreadBadge] = useState(true);
 
   const chatbotName = settings.chatbotName || 'Sift AI Assistant';
-  const chatbotGreeting = settings.chatbotGreeting || 'Hello! I am Alex\'s AI Portfolio Assistant powered by Groq. Ask me anything about Alex\'s skills, UI/UX services, or recent case studies!';
+  const chatbotGreeting = settings.chatbotGreeting || 'Hello! I am Sushant\'s AI Portfolio Assistant. Ask me anything about Sushant\'s skills, Software Development, Web services, Ai Engineering or recent case studies!';
   const isEnabled = settings.chatbotEnabled ?? true;
 
   const [messages, setMessages] = useState<ChatMessage[]>([
@@ -71,9 +71,9 @@ export const ChatBot: React.FC<ChatBotProps> = ({
   // Suggested quick prompt chips
   const quickPrompts = [
     'What services do you offer?',
-    'Show me Alex\'s top projects',
+    'Show me Sushant\'s top projects',
     'What is your tech stack?',
-    'How do I hire or contact Alex?'
+    'How do I hire or contact Sushant?'
   ];
 
   // Generate comprehensive portfolio context string
@@ -84,17 +84,17 @@ export const ChatBot: React.FC<ChatBotProps> = ({
     const blogsSummary = blogs.slice(0, 3).map(b => `- "${b.title}" (${b.category}): ${b.excerpt}`).join('\n');
 
     return `
-BACKGROUND CONTEXT FOR SUSHANT NAMURTE (SIFT MEDIA):
+BACKGROUND CONTEXT FOR SUSHANT NAMURTE (JUNIOR SOFTWARE ENGINEER):
 Name: ${settings.name || 'Sushant Namurte'}
 Title: ${settings.title || 'Lead Junior Software Engineer & Full-Stack Architect'}
-About: ${settings.aboutText || '10+ years of experience in UI/UX design & full-stack development.'}
-Email: ${settings.email || 'info@siftmedia.com'}
-Phone: ${settings.phone || '281-789-6642'}
-Location: ${settings.location || 'New York, NY, USA'}
-Stats: ${settings.stats?.yearsExperience || '10+'} Years Exp, ${settings.stats?.projectsCompleted || '12K'} Projects Completed, ${settings.stats?.satisfiedCustomers || '10K'} Clients, Rating ${settings.stats?.clientRating || '4.9/5'}.
+About: ${settings.aboutText || '1+ years of experience in Software Enineering, web design & full-stack development.'}
+Email: ${settings.email || 'sushantnamurte@gmail.com'}
+Phone: ${settings.phone || '+91 9172257304'}
+Location: ${settings.location || 'Nagpur, Maharastra, India'}
+Stats: ${settings.stats?.yearsExperience || '1+'} Years Exp, ${settings.stats?.projectsCompleted || '12K'} Projects Completed, ${settings.stats?.satisfiedCustomers || '10K'} Clients, Rating ${settings.stats?.clientRating || '4.9/5'}.
 
 SERVICES OFFERED:
-${servicesSummary || 'UI/UX Design, Web App Development, Full-Stack Architecture, Design Systems'}
+${servicesSummary || 'Software Development, Web App Development, Full-Stack Architecture, Design Systems'}
 
 FEATURED PROJECTS:
 ${projectsSummary || 'SaaS Analytics Dashboard, E-Commerce Platform, Mobile App'}
@@ -113,7 +113,7 @@ ${blogsSummary || 'Building Scalable Web Apps, Modern Design Systems'}
     
     if (q.includes('service') || q.includes('offer') || q.includes('do')) {
       const serviceList = services.map(s => `• **${s.title}**: ${s.description}`).join('\n');
-      return `Alex offers premier full-stack design & engineering services:\n\n${serviceList || '• UI/UX Design\n• Web & Mobile Engineering\n• Design Systems'}\n\nWould you like to start a project? Feel free to use the contact form!`;
+      return `Sushant offers premier full-stack design & engineering services:\n\n${serviceList || '• UI/UX Design\n• Web & Mobile Engineering\n• Design Systems'}\n\nWould you like to start a project? Feel free to use the contact form!`;
     }
 
     if (q.includes('project') || q.includes('case study') || q.includes('work') || q.includes('portfolio')) {
@@ -123,7 +123,7 @@ ${blogsSummary || 'Building Scalable Web Apps, Modern Design Systems'}
 
     if (q.includes('skill') || q.includes('tech') || q.includes('stack') || q.includes('language')) {
       const topSkills = skills.slice(0, 6).map(s => `${s.name} (${s.percentage}%)`).join(', ');
-      return `Alex's core engineering & design stack includes:\n\n• **Frontend & UI**: React, TypeScript, Tailwind CSS, Next.js, Figma\n• **Backend & DB**: Node.js, Express, PostgreSQL, Firebase, REST APIs\n• **Proficiencies**: ${topSkills}\n\nAll designs follow clean component architectures and WCAG accessibility guidelines!`;
+      return `Sushant's core engineering & design stack includes:\n\n• **Frontend & UI**: React, TypeScript, Tailwind CSS, Next.js, Figma\n• **Backend & DB**: Node.js, Express, PostgreSQL, Firebase, REST APIs\n• **Proficiencies**: ${topSkills}\n\nAll designs follow clean component architectures and WCAG accessibility guidelines!`;
     }
 
     if (q.includes('contact') || q.includes('hire') || q.includes('email') || q.includes('reach') || q.includes('phone')) {
@@ -234,7 +234,7 @@ ${blogsSummary || 'Building Scalable Web Apps, Modern Design Systems'}
         {!isOpen && unreadBadge && (
           <div className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#CCFF00] text-black font-black text-[10px] uppercase tracking-wider shadow-[0_0_20px_rgba(204,255,0,0.4)] animate-bounce">
             <Sparkles className="w-3 h-3" />
-            <span>Ask Groq AI</span>
+            <span>Ask Sift AI</span>
           </div>
         )}
 

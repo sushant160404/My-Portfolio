@@ -38,7 +38,7 @@ export const NewsletterSection: React.FC = () => {
 
         <h2 className="text-3xl sm:text-5xl font-black uppercase tracking-tight text-white">
           STAY UP TO DATE WITH <br />
-          ROBERT <span className="font-serif italic text-neutral-300 font-light">NEWSLETTER</span>
+          Sushant <span className="font-serif italic text-neutral-300 font-light">NEWSLETTER</span>
         </h2>
 
         {subscribed ? (

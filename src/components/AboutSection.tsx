@@ -8,6 +8,7 @@ interface AboutSectionProps {
 
 export const AboutSection: React.FC<AboutSectionProps> = ({ settings }) => {
   const highlights = [
+    'SOFTWARE DEVELOPMENT',
     'UI/UX DESIGN',
     'WEB DEVELOPMENT',
     'PRODUCT DESIGN',
@@ -28,7 +29,7 @@ export const AboutSection: React.FC<AboutSectionProps> = ({ settings }) => {
 
             <h2 className="text-3xl sm:text-5xl font-black uppercase tracking-tight text-white leading-tight">
               BEST JUNIOR SOFTWARE ENGINEER <br />
-              <span className="font-serif italic text-neutral-300 font-light">& DEVELOPER</span> IN USA
+              <span className="font-serif italic text-neutral-300 font-light">& DEVELOPER</span> IN INDIA
             </h2>
 
             <p className="text-neutral-400 text-sm sm:text-base leading-relaxed">

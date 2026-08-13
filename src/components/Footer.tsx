@@ -82,7 +82,7 @@ export const Footer: React.FC<FooterProps> = ({ settings }) => {
 
         {/* Bottom Copyright & Back to Top */}
         <div className="pt-8 border-t border-white/5 flex flex-col sm:flex-row items-center justify-between gap-4 text-center sm:text-left text-xs text-neutral-500 font-medium">
-          <p>© 2026 Personal Portfolio. All Rights Reserved Designed By Fleextstudio</p>
+          <p>© 2026 Personal Portfolio. All Rights Reserved Designed By Sushant Namurte</p>
           <button
             onClick={scrollToTop}
             className="inline-flex items-center gap-1.5 text-neutral-400 hover:text-[#CCFF00] transition-colors"
