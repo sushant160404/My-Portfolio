@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
+import { BrowserRouter, Routes, Route, useParams, useNavigate } from 'react-router-dom';
 import { Analytics } from '@vercel/analytics/react';
 import { SpeedInsights } from '@vercel/speed-insights/react';
 import { Header } from './components/Header';
@@ -32,7 +33,17 @@ import {
 import { db } from './lib/firebase';
 import { collection, doc, getDocs, getDoc, updateDoc, increment, setDoc } from 'firebase/firestore';
 
+// Wrapper component with routing
 export default function App() {
+  return (
+    <BrowserRouter>
+      <AppContent />
+    </BrowserRouter>
+  );
+}
+
+// Main app content with data management
+function AppContent() {
   const [settings, setSettings] = useState<SiteSettings>(INITIAL_SETTINGS);
   const [projects, setProjects] = useState<Project[]>(INITIAL_PROJECTS);
   const [services, setServices] = useState<Service[]>(INITIAL_SERVICES);
@@ -42,10 +53,9 @@ export default function App() {
 
   // Modals state
   const [videoModalOpen, setVideoModalOpen] = useState(false);
-  const [selectedProject, setSelectedProject] = useState<Project | null>(null);
-  const [selectedBlog, setSelectedBlog] = useState<Blog | null>(null);
   const [commandPaletteOpen, setCommandPaletteOpen] = useState(false);
-  const [adminPanelOpen, setAdminPanelOpen] = useState(false);
+  
+  const navigate = useNavigate();
 
   // Load content from Firestore or Express API
   const loadPortfolioData = useCallback(async () => {
@@ -114,12 +124,10 @@ export default function App() {
 
   // Handle selecting a blog post and incrementing its view/read count in Firestore & local state
   const handleSelectBlog = useCallback(async (blog: Blog) => {
-    setSelectedProject(null);
     const newViews = (blog.views || 0) + 1;
     const updatedBlog: Blog = { ...blog, views: newViews };
 
-    setSelectedBlog(updatedBlog);
-    setBlogs(prev => prev.map(b => b.id === blog.id ? updatedBlog : b));
+    setBlogs((prev) => prev.map((b) => b.id === blog.id ? updatedBlog : b));
 
     try {
       const blogRef = doc(db, 'blogs', blog.id);
@@ -131,7 +139,10 @@ export default function App() {
         console.warn('Could not update blog view count in Firestore:', e);
       }
     }
-  }, []);
+    
+    // Navigate to blog detail page
+    navigate(`/blog/${blog.id}`);
+  }, [navigate]);
 
   // Dynamic Theme Application
   useEffect(() => {
@@ -166,96 +177,104 @@ export default function App() {
     }
   }, [settings.theme]);
 
-  if (adminPanelOpen) {
-    return (
-      <AdminPanel
-        isOpen={true}
-        onClose={() => setAdminPanelOpen(false)}
-        projects={projects}
-        services={services}
-        skills={skills}
-        testimonials={testimonials}
-        blogs={blogs}
-        settings={settings}
-        onRefreshData={loadPortfolioData}
-      />
-    );
-  }
-
   return (
     <div className="min-h-screen bg-[#0E0E0E] text-white selection:bg-[#CCFF00] selection:text-black font-sans antialiased">
-      {/* Navbar */}
-      <Header
-        onOpenAdmin={() => setAdminPanelOpen(true)}
-        onOpenSearch={() => setCommandPaletteOpen(true)}
-        onNavigateHome={() => {
-          setSelectedProject(null);
-          setSelectedBlog(null);
-        }}
-      />
-
-      {selectedBlog ? (
-        <BlogDetailPage
-          blog={selectedBlog}
-          allBlogs={blogs}
-          onBack={() => setSelectedBlog(null)}
-          onSelectBlog={handleSelectBlog}
-        />
-      ) : selectedProject ? (
-        <ProjectDetailPage
-          project={selectedProject}
-          allProjects={projects}
-          onBack={() => setSelectedProject(null)}
-          onSelectProject={(p) => {
-            setSelectedBlog(null);
-            setSelectedProject(p);
-          }}
-        />
-      ) : (
-        <>
-          {/* Hero */}
-          <Hero
-            settings={settings}
-            onOpenVideo={() => setVideoModalOpen(true)}
-          />
-
-          {/* About */}
-          <AboutSection settings={settings} />
-
-          {/* Services */}
-          <ServicesSection services={services} />
-
-          {/* Skills */}
-          <SkillsSection skills={skills} />
-
-          {/* Projects Showcase */}
-          <ProjectsSection
+      <Routes>
+        {/* Admin Panel Route - Full screen without header */}
+        <Route path="/admin" element={
+          <AdminPanel
+            isOpen={true}
+            onClose={() => navigate('/')}
             projects={projects}
-            onSelectProject={(p) => {
-              setSelectedBlog(null);
-              setSelectedProject(p);
-            }}
-          />
-
-          {/* Blog Section */}
-          <BlogSection
+            services={services}
+            skills={skills}
+            testimonials={testimonials}
             blogs={blogs}
-            onSelectBlog={handleSelectBlog}
+            settings={settings}
+            onRefreshData={loadPortfolioData}
           />
+        } />
 
-          {/* Testimonials */}
-          <TestimonialsSection testimonials={testimonials} />
+        {/* Blog Detail Route */}
+        <Route path="/blog/:blogId" element={
+          <>
+            <Header
+              onOpenAdmin={() => navigate('/admin')}
+              onOpenSearch={() => setCommandPaletteOpen(true)}
+              onNavigateHome={() => navigate('/')}
+            />
+            <BlogDetailRoute
+              blogs={blogs}
+              onSelectBlog={handleSelectBlog}
+            />
+            <Footer settings={settings} />
+          </>
+        } />
 
-          {/* Contact Form */}
-          <ContactSection settings={settings} />
+        {/* Project Detail Route */}
+        <Route path="/project/:projectId" element={
+          <>
+            <Header
+              onOpenAdmin={() => navigate('/admin')}
+              onOpenSearch={() => setCommandPaletteOpen(true)}
+              onNavigateHome={() => navigate('/')}
+            />
+            <ProjectDetailRoute
+              projects={projects}
+              onSelectProject={(p: Project) => navigate(`/project/${p.id}`)}
+            />
+            <Footer settings={settings} />
+          </>
+        } />
 
-          {/* Newsletter Subscription */}
-          <NewsletterSection />
-        </>
-      )}
+        {/* Home Page Route */}
+        <Route path="/" element={
+          <>
+            <Header
+              onOpenAdmin={() => navigate('/admin')}
+              onOpenSearch={() => setCommandPaletteOpen(true)}
+              onNavigateHome={() => navigate('/')}
+            />
+            {/* Hero */}
+            <Hero
+              settings={settings}
+              onOpenVideo={() => setVideoModalOpen(true)}
+            />
 
-      {/* Footer */}
-      <Footer settings={settings} />
+            {/* About */}
+            <AboutSection settings={settings} />
+
+            {/* Services */}
+            <ServicesSection services={services} />
+
+            {/* Skills */}
+            <SkillsSection skills={skills} />
+
+            {/* Projects Showcase */}
+            <ProjectsSection
+              projects={projects}
+              onSelectProject={(p: Project) => navigate(`/project/${p.id}`)}
+            />
+
+            {/* Blog Section */}
+            <BlogSection
+              blogs={blogs}
+              onSelectBlog={handleSelectBlog}
+            />
+
+            {/* Testimonials */}
+            <TestimonialsSection testimonials={testimonials} />
+
+            {/* Contact Form */}
+            <ContactSection settings={settings} />
+
+            {/* Newsletter Subscription */}
+            <NewsletterSection />
+            
+            <Footer settings={settings} />
+          </>
+        } />
+      </Routes>
 
       {/* Interactive Modals */}
       {videoModalOpen && (
@@ -272,12 +291,9 @@ export default function App() {
         services={services}
         skills={skills}
         blogs={blogs}
-        onSelectProject={(p) => {
-          setSelectedBlog(null);
-          setSelectedProject(p);
-        }}
+        onSelectProject={(p: Project) => navigate(`/project/${p.id}`)}
         onSelectBlog={handleSelectBlog}
-        onOpenAdmin={() => setAdminPanelOpen(true)}
+        onOpenAdmin={() => navigate('/admin')}
       />
 
       {/* Floating Groq AI ChatBot */}
@@ -291,10 +307,7 @@ export default function App() {
           const el = document.getElementById('contact');
           if (el) el.scrollIntoView({ behavior: 'smooth' });
         }}
-        onSelectProject={(p) => {
-          setSelectedBlog(null);
-          setSelectedProject(p);
-        }}
+        onSelectProject={(p: Project) => navigate(`/project/${p.id}`)}
         onSelectBlog={handleSelectBlog}
       />
 
@@ -304,5 +317,70 @@ export default function App() {
       {/* Vercel Speed Insights */}
       <SpeedInsights />
     </div>
+  );
+}
+
+// Route components for dynamic parameters
+function BlogDetailRoute({ blogs, onSelectBlog }: { blogs: Blog[]; onSelectBlog: (blog: Blog) => void }) {
+  const { blogId } = useParams<{ blogId: string }>();
+  const navigate = useNavigate();
+  
+  const blog = blogs.find((b) => b.id === blogId);
+
+  if (!blog) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <h1 className="text-4xl font-bold mb-4">Blog Not Found</h1>
+          <button
+            onClick={() => navigate('/')}
+            className="px-6 py-3 bg-[#CCFF00] text-black rounded-lg hover:bg-[#b3e600] transition"
+          >
+            Return Home
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <BlogDetailPage
+      blog={blog}
+      allBlogs={blogs}
+      onBack={() => navigate('/')}
+      onSelectBlog={onSelectBlog}
+    />
+  );
+}
+
+function ProjectDetailRoute({ projects, onSelectProject }: { projects: Project[]; onSelectProject: (p: Project) => void }) {
+  const { projectId } = useParams<{ projectId: string }>();
+  const navigate = useNavigate();
+  
+  const project = projects.find((p) => p.id === projectId);
+
+  if (!project) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <h1 className="text-4xl font-bold mb-4">Project Not Found</h1>
+          <button
+            onClick={() => navigate('/')}
+            className="px-6 py-3 bg-[#CCFF00] text-black rounded-lg hover:bg-[#b3e600] transition"
+          >
+            Return Home
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <ProjectDetailPage
+      project={project}
+      allProjects={projects}
+      onBack={() => navigate('/')}
+      onSelectProject={onSelectProject}
+    />
   );
 }

@@ -49,19 +49,20 @@ export const ProjectDetailPage: React.FC<ProjectDetailPageProps> = ({
     <div className="min-h-screen bg-[#0E0E0E] text-white pt-24 pb-20 animate-fadeIn">
       
       {/* Sticky Top Navigation / Breadcrumbs */}
-      <div className="sticky top-16 z-40 bg-[#0E0E0E]/90 backdrop-blur-md border-b border-white/10 py-3.5 px-4 sm:px-8">
-        <div className="max-w-7xl mx-auto flex items-center justify-between">
+      <div className="sticky top-14 sm:top-16 z-30 bg-[#0E0E0E]/95 backdrop-blur-md border-b border-white/10 py-3 sm:py-3.5 px-4 sm:px-8">
+        <div className="max-w-7xl mx-auto flex items-center justify-between gap-2">
           
           <button
             onClick={onBack}
-            className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-neutral-900 border border-neutral-800 text-neutral-300 hover:text-white hover:border-[#CCFF00] text-xs font-bold uppercase tracking-wider transition-colors"
+            className="inline-flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2 rounded-lg sm:rounded-xl bg-neutral-900 border border-neutral-800 text-neutral-300 hover:text-white hover:border-[#CCFF00] text-[10px] sm:text-xs font-bold uppercase tracking-wider transition-colors"
           >
-            <ArrowLeft className="w-4 h-4 text-[#CCFF00]" />
-            <span>Back to Projects</span>
+            <ArrowLeft className="w-3.5 sm:w-4 h-3.5 sm:h-4 text-[#CCFF00]" />
+            <span className="hidden xs:inline">Back to Projects</span>
+            <span className="xs:hidden">Back</span>
           </button>
 
           {/* Breadcrumbs */}
-          <div className="hidden sm:flex items-center gap-2 text-xs text-neutral-400 font-mono">
+          <div className="hidden md:flex items-center gap-2 text-xs text-neutral-400 font-mono">
             <span className="hover:text-white cursor-pointer" onClick={onBack}>Projects</span>
             <span>/</span>
             <span className="text-[#CCFF00] font-bold truncate max-w-[200px]">{project.category}</span>
@@ -72,7 +73,7 @@ export const ProjectDetailPage: React.FC<ProjectDetailPageProps> = ({
           {/* Share Action */}
           <button
             onClick={handleShare}
-            className="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl bg-neutral-900 border border-neutral-800 text-neutral-300 hover:text-white text-xs font-bold transition-colors"
+            className="inline-flex items-center gap-1.5 sm:gap-2 p-2 sm:px-3.5 sm:py-2 rounded-lg sm:rounded-xl bg-neutral-900 border border-neutral-800 text-neutral-300 hover:text-white text-xs font-bold transition-colors"
             title="Share Case Study"
           >
             {copied ? <Check className="w-3.5 h-3.5 text-[#CCFF00]" /> : <Share2 className="w-3.5 h-3.5" />}

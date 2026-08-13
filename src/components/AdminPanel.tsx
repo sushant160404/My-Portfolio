@@ -680,7 +680,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
   return (
     <div className="min-h-screen bg-[#0E0E0E] text-white flex flex-col lg:flex-row font-sans antialiased">
       {/* Left Admin Sidebar */}
-      <div className="w-full lg:w-72 bg-[#121212] border-b lg:border-b-0 lg:border-r border-white/10 flex flex-col justify-between shrink-0 p-5 space-y-6">
+      <div className="w-full lg:w-72 bg-[#121212] border-b lg:border-b-0 lg:border-r border-white/10 flex flex-col justify-between shrink-0 p-5 space-y-6 lg:sticky lg:top-0 lg:h-screen lg:overflow-y-auto">
         <div className="space-y-5">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
@@ -777,7 +777,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
       {/* Main Admin Content Page */}
       <div className="flex-1 bg-[#0E0E0E] flex flex-col min-h-screen">
         {/* Header Bar */}
-        <header className="p-4 lg:px-8 border-b border-white/10 bg-[#141414] flex items-center justify-between">
+        <header className="p-4 lg:px-8 border-b border-white/10 bg-[#141414] flex items-center justify-between sticky top-0 z-10">
           <div>
             <h3 className="text-sm font-black uppercase tracking-tight text-white flex items-center gap-2">
               <span className="text-neutral-500">Admin</span>

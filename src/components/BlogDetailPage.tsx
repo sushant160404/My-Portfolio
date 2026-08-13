@@ -54,19 +54,20 @@ export const BlogDetailPage: React.FC<BlogDetailPageProps> = ({
     <div className="min-h-screen bg-[#0E0E0E] text-white pt-24 pb-20 animate-fadeIn">
       
       {/* Sticky Top Navigation & Breadcrumbs Bar */}
-      <div className="sticky top-16 z-40 bg-[#0E0E0E]/90 backdrop-blur-md border-b border-white/10 py-3.5 px-4 sm:px-8">
-        <div className="max-w-5xl mx-auto flex items-center justify-between gap-4">
+      <div className="sticky top-14 sm:top-16 z-30 bg-[#0E0E0E]/95 backdrop-blur-md border-b border-white/10 py-3 sm:py-3.5 px-4 sm:px-8">
+        <div className="max-w-5xl mx-auto flex items-center justify-between gap-2 sm:gap-4">
           
           <button
             onClick={onBack}
-            className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-neutral-900 border border-neutral-800 text-neutral-300 hover:text-white hover:border-[#CCFF00] text-xs font-bold uppercase tracking-wider transition-colors shrink-0"
+            className="inline-flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2 rounded-lg sm:rounded-xl bg-neutral-900 border border-neutral-800 text-neutral-300 hover:text-white hover:border-[#CCFF00] text-[10px] sm:text-xs font-bold uppercase tracking-wider transition-colors shrink-0"
           >
-            <ArrowLeft className="w-4 h-4 text-[#CCFF00]" />
-            <span>Back to Articles</span>
+            <ArrowLeft className="w-3.5 sm:w-4 h-3.5 sm:h-4 text-[#CCFF00]" />
+            <span className="hidden xs:inline">Back to Articles</span>
+            <span className="xs:hidden">Back</span>
           </button>
 
           {/* Breadcrumbs */}
-          <div className="hidden sm:flex items-center gap-2 text-xs text-neutral-400 font-mono truncate">
+          <div className="hidden md:flex items-center gap-2 text-xs text-neutral-400 font-mono truncate">
             <span className="hover:text-white cursor-pointer" onClick={onBack}>Blog</span>
             <span>/</span>
             <span className="text-[#CCFF00] font-bold">{blog.category}</span>
@@ -77,7 +78,7 @@ export const BlogDetailPage: React.FC<BlogDetailPageProps> = ({
           {/* Share Action */}
           <button
             onClick={handleShare}
-            className="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl bg-neutral-900 border border-neutral-800 text-neutral-300 hover:text-white text-xs font-bold transition-colors shrink-0"
+            className="inline-flex items-center gap-1.5 sm:gap-2 p-2 sm:px-3.5 sm:py-2 rounded-lg sm:rounded-xl bg-neutral-900 border border-neutral-800 text-neutral-300 hover:text-white text-xs font-bold transition-colors shrink-0"
             title="Share Article"
           >
             {copied ? <Check className="w-3.5 h-3.5 text-[#CCFF00]" /> : <Share2 className="w-3.5 h-3.5" />}
