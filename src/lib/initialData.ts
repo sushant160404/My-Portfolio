@@ -13,21 +13,21 @@ import {
 export const INITIAL_SETTINGS: SiteSettings = {
   name: 'Sushant Namurte',
   title: 'A JUNIOR SOFTWARE ENGINEER & DEVELOPER',
-  subtitle: 'As a dedicated professional with a passion for Sift, I bring 10+ years of experience in ui/ux design & development throughout best of my career.',
-  aboutTitle: 'BEST JUNIOR SOFTWARE ENGINEER & DEVELOPER IN USA',
+  subtitle: 'As a dedicated professional with a passion for Sift, I bring 1+ years of experience in ui/ux design & development throughout best of my career.',
+  aboutTitle: 'BEST JUNIOR SOFTWARE ENGINEER & DEVELOPER IN INDIA',
   aboutText: 'At Sift, we understand that success is just about delivering a product - it\'s about building relationships and making a meaningful impact of client.',
-  phone: '281-789-6642',
-  email: 'info@siftmedia.com',
-  location: 'New York, NY, USA',
+  phone: '+91 9172257304',
+  email: 'sushantnamurte@gmail.com',
+  location: 'Nagpur, Maharastra, India',
   cvUrl: '/profile.jpg',
   cvFileName: 'Alex_Robert_Resume_2026.pdf',
   profileImageUrl: '/profile.jpg',
   aboutImageUrl: '/avatar.jpg',
-  videoUrl: 'https://www.youtube.com/embed/dQw4w9WgXcQ',
+  videoUrl: '#',
   stats: {
     projectsCompleted: '12K',
     satisfiedCustomers: '10K',
-    yearsExperience: '10+',
+    yearsExperience: '1+',
     clientRating: '4.9/5'
   },
   socialLinks: {
@@ -220,7 +220,7 @@ export const INITIAL_EXPERIENCES: Experience[] = [
   {
     id: 'e1',
     company: 'Sift Digital Studio',
-    role: 'Lead Junior Software Engineer & Senior Front-End Developer',
+    role: 'Lead UI/UX Designer & Senior Front-End Developer',
     location: 'New York, USA',
     startDate: '2021',
     endDate: 'Present',

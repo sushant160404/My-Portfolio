@@ -127,10 +127,10 @@ ${blogsSummary || 'Building Scalable Web Apps, Modern Design Systems'}
     }
 
     if (q.includes('contact') || q.includes('hire') || q.includes('email') || q.includes('reach') || q.includes('phone')) {
-      return `You can get in touch with Alex directly:\n\n• **Email**: ${settings.email}\n• **Phone**: ${settings.phone}\n• **Location**: ${settings.location}\n\nOr click the **Contact** section at the top to send a direct message!`;
+      return `You can get in touch with Sushant directly:\n\n• **Email**: ${settings.email}\n• **Phone**: ${settings.phone}\n• **Location**: ${settings.location}\n\nOr click the **Contact** section at the top to send a direct message!`;
     }
 
-    return `Sushant Namurte is a Lead Junior Software Engineer & Full-Stack Architect with ${settings.stats?.yearsExperience || '10+'} years of experience building high-impact digital products.\n\nKey highlights:\n• Over ${settings.stats?.projectsCompleted || '12K'} projects delivered\n• ${settings.stats?.satisfiedCustomers || '10K'} satisfied client reviews\n• Direct Email: ${settings.email}\n\n*(Note: For live real-time LLM responses, you can configure your Groq API Key in the Admin Panel → AI Chatbot tab!)*`;
+    return `Sushant Namurte is a Lead Junior Software Engineer & Full-Stack Architect with ${settings.stats?.yearsExperience || '1+'} years of experience building high-impact digital products.\n\nKey highlights:\n• Over ${settings.stats?.projectsCompleted || '12K'} projects delivered\n• ${settings.stats?.satisfiedCustomers || '10K'} satisfied client reviews\n• Direct Email: ${settings.email}\n\n*(Note: For live real-time LLM responses, you can configure your Groq API Key in the Admin Panel → AI Chatbot tab!)*`;
   };
 
   const handleSendMessage = async (textToSend?: string) => {
