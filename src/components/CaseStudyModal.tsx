@@ -42,6 +42,12 @@ export const CaseStudyModal: React.FC<CaseStudyModalProps> = ({ project, onClose
                 src={project.thumbnail}
                 alt={project.title}
                 className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                onError={(e) => {
+                  const target = e.target as HTMLImageElement;
+                  target.src = 'https://placehold.co/1200x675/141414/CCFF00?text=Project+Image';
+                }}
+                loading="lazy"
+                crossOrigin="anonymous"
               />
             </div>
 

@@ -58,6 +58,11 @@ export const Hero: React.FC<HeroProps> = ({ settings, onOpenVideo }) => {
                 src={settings.profileImageUrl || "/profile.jpg"}
                 alt={settings.name}
                 className="w-full h-full object-cover object-top filter grayscale contrast-125 hover:grayscale-0 transition-all duration-700"
+                onError={(e) => {
+                  const target = e.target as HTMLImageElement;
+                  target.src = 'https://placehold.co/400x500/141414/CCFF00?text=Profile';
+                }}
+                loading="eager"
               />
 
               {/* Top Rotating Hire Us Badge */}

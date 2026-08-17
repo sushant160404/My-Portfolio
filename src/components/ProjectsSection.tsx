@@ -62,6 +62,12 @@ export const ProjectsSection: React.FC<ProjectsSectionProps> = ({ projects, onSe
                   src={project.thumbnail}
                   alt={project.title}
                   className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 filter brightness-90 group-hover:brightness-100"
+                  onError={(e) => {
+                    const target = e.target as HTMLImageElement;
+                    target.src = 'https://placehold.co/1200x750/141414/CCFF00?text=Project+Image';
+                  }}
+                  loading="lazy"
+                  crossOrigin="anonymous"
                 />
                 <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-3">
                   <button

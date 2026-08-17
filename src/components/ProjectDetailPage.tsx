@@ -138,6 +138,12 @@ export const ProjectDetailPage: React.FC<ProjectDetailPageProps> = ({
             src={project.thumbnail}
             alt={project.title}
             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 filter brightness-95 group-hover:brightness-100"
+            onError={(e) => {
+              const target = e.target as HTMLImageElement;
+              target.src = 'https://placehold.co/1600x900/141414/CCFF00?text=Project+Image';
+            }}
+            loading="lazy"
+            crossOrigin="anonymous"
           />
           <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-60" />
         </div>
@@ -293,6 +299,12 @@ export const ProjectDetailPage: React.FC<ProjectDetailPageProps> = ({
                       src={p.thumbnail}
                       alt={p.title}
                       className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                      onError={(e) => {
+                        const target = e.target as HTMLImageElement;
+                        target.src = 'https://placehold.co/800x600/141414/CCFF00?text=Project+Image';
+                      }}
+                      loading="lazy"
+                      crossOrigin="anonymous"
                     />
                   </div>
                   <span className="px-2 py-0.5 rounded bg-[#CCFF00]/10 text-[#CCFF00] text-[9px] font-bold uppercase tracking-wider inline-block">

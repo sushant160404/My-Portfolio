@@ -129,6 +129,12 @@ export const BlogDetailPage: React.FC<BlogDetailPageProps> = ({
             src={blog.featuredImage}
             alt={blog.title}
             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
+            onError={(e) => {
+              const target = e.target as HTMLImageElement;
+              target.src = 'https://placehold.co/1200x675/141414/CCFF00?text=Blog+Image';
+            }}
+            loading="lazy"
+            crossOrigin="anonymous"
           />
         </div>
 
@@ -257,6 +263,12 @@ export const BlogDetailPage: React.FC<BlogDetailPageProps> = ({
                       src={b.featuredImage}
                       alt={b.title}
                       className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                      onError={(e) => {
+                        const target = e.target as HTMLImageElement;
+                        target.src = 'https://placehold.co/800x600/141414/CCFF00?text=Blog+Image';
+                      }}
+                      loading="lazy"
+                      crossOrigin="anonymous"
                     />
                   </div>
                   <div className="flex items-center justify-between text-[10px] text-neutral-400 font-mono">

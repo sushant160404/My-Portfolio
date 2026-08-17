@@ -72,6 +72,12 @@ export const BlogSection: React.FC<BlogSectionProps> = ({ blogs, onSelectBlog })
                     src={blog.featuredImage}
                     alt={blog.title}
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                    onError={(e) => {
+                      const target = e.target as HTMLImageElement;
+                      target.src = 'https://placehold.co/800x600/141414/CCFF00?text=Blog+Image';
+                    }}
+                    loading="lazy"
+                    crossOrigin="anonymous"
                   />
                   <div className="absolute top-3 left-3">
                     <span className="px-3 py-1 rounded-full bg-black/80 backdrop-blur-md border border-white/10 text-[#CCFF00] text-[10px] font-mono font-bold uppercase tracking-wider">
