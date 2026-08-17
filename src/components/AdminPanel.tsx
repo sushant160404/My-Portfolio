@@ -14,6 +14,7 @@ import {
 import { INITIAL_PROJECTS, INITIAL_SERVICES, INITIAL_SKILLS, INITIAL_TESTIMONIALS, INITIAL_BLOGS, INITIAL_SETTINGS } from '../lib/initialData';
 import { db } from '../lib/firebase';
 import { collection, doc, setDoc, deleteDoc, getDocs } from 'firebase/firestore';
+import { uploadFileToStorage, fileToDataURL } from '../lib/uploadHelper';
 
 interface AdminPanelProps {
   isOpen: boolean;
@@ -1582,17 +1583,20 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                         type="file"
                         accept="image/*"
                         className="hidden"
-                        onChange={(e) => {
+                        onChange={async (e) => {
                           const file = e.target.files?.[0];
                           if (file) {
-                            const reader = new FileReader();
-                            reader.onload = (uploadEvent) => {
-                              const result = uploadEvent.target?.result as string;
-                              if (result) {
-                                setTestimonialForm({ ...testimonialForm, avatar: result });
-                              }
-                            };
-                            reader.readAsDataURL(file);
+                            try {
+                              notify('Uploading avatar image...');
+                              const url = await uploadFileToStorage(file, 'testimonial_avatars');
+                              setTestimonialForm({ ...testimonialForm, avatar: url });
+                              notify('Avatar uploaded successfully!');
+                            } catch (error) {
+                              // Fallback to data URL if Firebase upload fails
+                              const dataUrl = await fileToDataURL(file);
+                              setTestimonialForm({ ...testimonialForm, avatar: dataUrl });
+                              notify('Avatar loaded (local preview)');
+                            }
                           }
                         }}
                       />
@@ -2201,22 +2205,26 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                           type="file"
                           accept="image/*"
                           className="hidden"
-                          onChange={(e) => {
+                          onChange={async (e) => {
                             const file = e.target.files?.[0];
                             if (file) {
-                              const reader = new FileReader();
-                              reader.onload = (uploadEvent) => {
-                                const result = uploadEvent.target?.result as string;
-                                if (result) {
-                                  setSiteSettingsForm({
-                                    ...siteSettingsForm,
-                                    profileImageUrl: result
-                                  });
-                                  setNotification('Profile photo uploaded and updated!');
-                                  setTimeout(() => setNotification(null), 3000);
-                                }
-                              };
-                              reader.readAsDataURL(file);
+                              try {
+                                notify('Uploading profile photo...');
+                                const url = await uploadFileToStorage(file, 'profile_images');
+                                setSiteSettingsForm({
+                                  ...siteSettingsForm,
+                                  profileImageUrl: url
+                                });
+                                notify('Profile photo uploaded successfully!');
+                              } catch (error) {
+                                // Fallback to data URL if Firebase upload fails
+                                const dataUrl = await fileToDataURL(file);
+                                setSiteSettingsForm({
+                                  ...siteSettingsForm,
+                                  profileImageUrl: dataUrl
+                                });
+                                notify('Profile photo loaded (local preview)');
+                              }
                             }
                           }}
                         />
@@ -2293,23 +2301,28 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                         type="file"
                         accept=".pdf,.doc,.docx,image/*"
                         className="hidden"
-                        onChange={(e) => {
+                        onChange={async (e) => {
                           const file = e.target.files?.[0];
                           if (file) {
-                            const reader = new FileReader();
-                            reader.onload = (uploadEvent) => {
-                              const result = uploadEvent.target?.result as string;
-                              if (result) {
-                                setSiteSettingsForm({
-                                  ...siteSettingsForm,
-                                  cvUrl: result,
-                                  cvFileName: file.name
-                                });
-                                setNotification(`CV document "${file.name}" uploaded successfully!`);
-                                setTimeout(() => setNotification(null), 3000);
-                              }
-                            };
-                            reader.readAsDataURL(file);
+                            try {
+                              notify('Uploading CV document...');
+                              const url = await uploadFileToStorage(file, 'cv_documents');
+                              setSiteSettingsForm({
+                                ...siteSettingsForm,
+                                cvUrl: url,
+                                cvFileName: file.name
+                              });
+                              notify(`CV "${file.name}" uploaded successfully!`);
+                            } catch (error) {
+                              // Fallback to data URL if Firebase upload fails
+                              const dataUrl = await fileToDataURL(file);
+                              setSiteSettingsForm({
+                                ...siteSettingsForm,
+                                cvUrl: dataUrl,
+                                cvFileName: file.name
+                              });
+                              notify(`CV "${file.name}" loaded (local preview)`);
+                            }
                           }
                         }}
                       />
