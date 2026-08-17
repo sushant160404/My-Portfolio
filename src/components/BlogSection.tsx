@@ -15,10 +15,11 @@ export const BlogSection: React.FC<BlogSectionProps> = ({ blogs, onSelectBlog })
   // Extract unique categories
   const categories = ['ALL', ...Array.from(new Set(blogs.map((b) => b.category)))];
 
-  // Filtered list
-  const filteredBlogs = selectedCategory === 'ALL'
+  // Filtered list (exclude drafts on public view)
+  const filteredBlogs = (selectedCategory === 'ALL'
     ? blogs
-    : blogs.filter((b) => b.category === selectedCategory);
+    : blogs.filter((b) => b.category === selectedCategory)
+  ).filter(b => (b.status || 'published') !== 'draft');
 
   return (
     <section id="blog" className="py-20 bg-[#0E0E0E] text-white border-t border-white/10">

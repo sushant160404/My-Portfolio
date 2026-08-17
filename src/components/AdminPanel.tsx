@@ -159,10 +159,16 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
     category: 'UI/UX Design',
     excerpt: '',
     content: '',
+    contentBlocks: [],
     featuredImage: 'https://images.unsplash.com/photo-1507238691740-187a5b1d37b8?q=80&w=800&auto=format&fit=crop',
     tags: ['Design Systems', 'UX'],
     readTime: '5 min read',
     featured: true,
+    status: 'published',
+    tableOfContents: false,
+    seriesId: '',
+    seriesTitle: '',
+    seriesOrder: undefined,
     seoTitle: '',
     metaDescription: '',
     keywords: ['UI UX Design', 'Sift Media'],
@@ -170,6 +176,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
     ogImage: '',
     noIndex: false
   });
+  const [newBlockType, setNewBlockType] = useState<string>('paragraph');
 
   const [siteSettingsForm, setSiteSettingsForm] = useState<SiteSettings>(settings);
 
@@ -268,6 +275,48 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
     }
   };
 
+  // Auto-calculate read time from content blocks (~200 wpm)
+  const calcReadTime = (blocks: import('../types').BlogContentBlock[]): string => {
+    const words = blocks.reduce((acc, b) => {
+      const text = [b.content, ...(b.items || [])].join(' ');
+      return acc + text.split(/\s+/).filter(Boolean).length;
+    }, 0);
+    const mins = Math.max(1, Math.ceil(words / 200));
+    return `${mins} min read`;
+  };
+
+  // Content block helpers
+  const addBlock = (type: string) => {
+    const base: import('../types').BlogContentBlock = { type: type as any, content: '' };
+    if (type === 'heading') base.level = 2;
+    if (type === 'list') { base.items = ['']; base.ordered = false; }
+    if (type === 'callout') base.style = 'tip';
+    if (type === 'code') base.language = 'javascript';
+    setBlogForm(f => ({ ...f, contentBlocks: [...(f.contentBlocks || []), base] }));
+  };
+
+  const updateBlock = (idx: number, patch: Partial<import('../types').BlogContentBlock>) => {
+    setBlogForm(f => {
+      const blocks = [...(f.contentBlocks || [])];
+      blocks[idx] = { ...blocks[idx], ...patch };
+      return { ...f, contentBlocks: blocks };
+    });
+  };
+
+  const removeBlock = (idx: number) => {
+    setBlogForm(f => ({ ...f, contentBlocks: (f.contentBlocks || []).filter((_, i) => i !== idx) }));
+  };
+
+  const moveBlock = (idx: number, dir: -1 | 1) => {
+    setBlogForm(f => {
+      const blocks = [...(f.contentBlocks || [])];
+      const to = idx + dir;
+      if (to < 0 || to >= blocks.length) return f;
+      [blocks[idx], blocks[to]] = [blocks[to], blocks[idx]];
+      return { ...f, contentBlocks: blocks };
+    });
+  };
+
   // Blog & SEO Save Handler
   const handleSaveBlog = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -285,12 +334,18 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
         slug: generatedSlug,
         excerpt: blogForm.excerpt || '',
         content: blogForm.content || '',
+        contentBlocks: blogForm.contentBlocks || [],
         featuredImage: blogForm.featuredImage || 'https://images.unsplash.com/photo-1507238691740-187a5b1d37b8?q=80&w=800&auto=format&fit=crop',
         category: blogForm.category || 'UI/UX Design',
         tags: typeof blogForm.tags === 'string' ? (blogForm.tags as string).split(',').map(s => s.trim()) : (blogForm.tags || ['Design']),
         publishedAt: blogForm.publishedAt || new Date().toISOString().split('T')[0],
-        readTime: blogForm.readTime || '5 min read',
+        readTime: blogForm.readTime || calcReadTime(blogForm.contentBlocks || []),
         featured: blogForm.featured ?? true,
+        status: blogForm.status || 'published',
+        tableOfContents: blogForm.tableOfContents ?? false,
+        seriesId: blogForm.seriesId || undefined,
+        seriesTitle: blogForm.seriesTitle || undefined,
+        seriesOrder: blogForm.seriesOrder || undefined,
         views: blogForm.views || 100,
         seoTitle: autoSeoTitle,
         metaDescription: autoMetaDesc,
@@ -311,10 +366,16 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
         category: 'UI/UX Design',
         excerpt: '',
         content: '',
+        contentBlocks: [],
         featuredImage: 'https://images.unsplash.com/photo-1507238691740-187a5b1d37b8?q=80&w=800&auto=format&fit=crop',
         tags: ['Design Systems', 'UX'],
         readTime: '5 min read',
         featured: true,
+        status: 'published',
+        tableOfContents: false,
+        seriesId: '',
+        seriesTitle: '',
+        seriesOrder: undefined,
         seoTitle: '',
         metaDescription: '',
         keywords: ['UI UX Design'],
@@ -340,11 +401,17 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
       category: post.category,
       excerpt: post.excerpt,
       content: post.content,
+      contentBlocks: post.contentBlocks || [],
       featuredImage: post.featuredImage,
       tags: post.tags,
       publishedAt: post.publishedAt,
       readTime: post.readTime,
       featured: post.featured,
+      status: post.status || 'published',
+      tableOfContents: post.tableOfContents ?? false,
+      seriesId: post.seriesId || '',
+      seriesTitle: post.seriesTitle || '',
+      seriesOrder: post.seriesOrder,
       views: post.views,
       seoTitle: post.seoTitle || post.title,
       metaDescription: post.metaDescription || post.excerpt,
@@ -363,10 +430,16 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
       category: 'UI/UX Design',
       excerpt: '',
       content: '',
+      contentBlocks: [],
       featuredImage: 'https://images.unsplash.com/photo-1507238691740-187a5b1d37b8?q=80&w=800&auto=format&fit=crop',
       tags: ['Design Systems', 'UX'],
       readTime: '5 min read',
       featured: true,
+      status: 'published',
+      tableOfContents: false,
+      seriesId: '',
+      seriesTitle: '',
+      seriesOrder: undefined,
       seoTitle: '',
       metaDescription: '',
       keywords: ['UI UX Design'],
@@ -1860,6 +1933,256 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                   </div>
                 </div>
 
+                {/* Section B: Content Blocks Builder */}
+                <div className="space-y-4">
+                  <h6 className="text-[11px] font-bold uppercase tracking-wider text-neutral-300 flex items-center gap-1.5">
+                    <FileText className="w-3.5 h-3.5 text-[#CCFF00]" />
+                    <span>2. Long-Form Content Builder (Blocks)</span>
+                  </h6>
+
+                  {/* Options row */}
+                  <div className="flex flex-wrap items-center gap-4">
+                    <label className="flex items-center gap-2 cursor-pointer text-xs text-neutral-300">
+                      <input
+                        type="checkbox"
+                        checked={blogForm.tableOfContents ?? false}
+                        onChange={(e) => setBlogForm({ ...blogForm, tableOfContents: e.target.checked })}
+                        className="rounded border-white/20 bg-[#121212] text-[#CCFF00] focus:ring-0"
+                      />
+                      <span>Show Table of Contents</span>
+                    </label>
+                    <label className="flex items-center gap-2 cursor-pointer text-xs text-neutral-300">
+                      <input
+                        type="checkbox"
+                        checked={(blogForm.status || 'published') === 'draft'}
+                        onChange={(e) => setBlogForm({ ...blogForm, status: e.target.checked ? 'draft' : 'published' })}
+                        className="rounded border-white/20 bg-[#121212] text-amber-400 focus:ring-0"
+                      />
+                      <span className="text-amber-400">Save as Draft</span>
+                    </label>
+                  </div>
+
+                  {/* Series fields */}
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                    <div>
+                      <label className="text-[10px] font-bold uppercase tracking-wider text-neutral-400 block mb-1">Series ID (optional)</label>
+                      <input
+                        type="text"
+                        placeholder="e.g. react-series"
+                        value={blogForm.seriesId || ''}
+                        onChange={(e) => setBlogForm({ ...blogForm, seriesId: e.target.value })}
+                        className="w-full bg-[#121212] border border-white/10 rounded-xl px-3 py-2 text-xs text-white font-mono placeholder-neutral-600 focus:outline-none focus:border-[#CCFF00]"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-[10px] font-bold uppercase tracking-wider text-neutral-400 block mb-1">Series Title</label>
+                      <input
+                        type="text"
+                        placeholder="e.g. React Mastery Series"
+                        value={blogForm.seriesTitle || ''}
+                        onChange={(e) => setBlogForm({ ...blogForm, seriesTitle: e.target.value })}
+                        className="w-full bg-[#121212] border border-white/10 rounded-xl px-3 py-2 text-xs text-white placeholder-neutral-600 focus:outline-none focus:border-[#CCFF00]"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-[10px] font-bold uppercase tracking-wider text-neutral-400 block mb-1">Part #</label>
+                      <input
+                        type="number"
+                        min={1}
+                        placeholder="1"
+                        value={blogForm.seriesOrder ?? ''}
+                        onChange={(e) => setBlogForm({ ...blogForm, seriesOrder: e.target.value ? Number(e.target.value) : undefined })}
+                        className="w-full bg-[#121212] border border-white/10 rounded-xl px-3 py-2 text-xs text-white placeholder-neutral-600 focus:outline-none focus:border-[#CCFF00]"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Block list */}
+                  <div className="space-y-3">
+                    {(blogForm.contentBlocks || []).length === 0 && (
+                      <p className="text-[11px] text-neutral-500 italic py-2">No content blocks yet. Add blocks below to build long-form content.</p>
+                    )}
+                    {(blogForm.contentBlocks || []).map((block, idx) => (
+                      <div key={idx} className="bg-[#121212] border border-white/10 rounded-xl p-4 space-y-3">
+                        <div className="flex items-center justify-between gap-2">
+                          <span className="text-[10px] font-bold uppercase tracking-wider text-[#CCFF00] font-mono">{block.type}</span>
+                          <div className="flex items-center gap-1">
+                            <button type="button" onClick={() => moveBlock(idx, -1)} disabled={idx === 0}
+                              className="p-1 rounded text-neutral-500 hover:text-white disabled:opacity-30 text-xs font-mono">▲</button>
+                            <button type="button" onClick={() => moveBlock(idx, 1)} disabled={idx === (blogForm.contentBlocks || []).length - 1}
+                              className="p-1 rounded text-neutral-500 hover:text-white disabled:opacity-30 text-xs font-mono">▼</button>
+                            <button type="button" onClick={() => removeBlock(idx)}
+                              className="p-1.5 rounded bg-red-500/10 text-red-400 hover:bg-red-500/20 border border-red-500/20">
+                              <Trash2 className="w-3 h-3" />
+                            </button>
+                          </div>
+                        </div>
+
+                        {/* Heading level */}
+                        {block.type === 'heading' && (
+                          <div className="flex items-center gap-2">
+                            <label className="text-[10px] text-neutral-400">Level:</label>
+                            <select
+                              value={block.level || 2}
+                              onChange={(e) => updateBlock(idx, { level: Number(e.target.value) })}
+                              className="bg-[#181818] border border-white/10 rounded-lg px-2 py-1 text-xs text-white focus:outline-none focus:border-[#CCFF00]"
+                            >
+                              {[1, 2, 3, 4].map(l => <option key={l} value={l}>H{l}</option>)}
+                            </select>
+                          </div>
+                        )}
+
+                        {/* Code language */}
+                        {block.type === 'code' && (
+                          <input
+                            type="text"
+                            placeholder="Language (e.g. javascript)"
+                            value={block.language || ''}
+                            onChange={(e) => updateBlock(idx, { language: e.target.value })}
+                            className="w-full bg-[#181818] border border-white/10 rounded-lg px-3 py-1.5 text-xs text-white font-mono placeholder-neutral-600 focus:outline-none focus:border-[#CCFF00]"
+                          />
+                        )}
+
+                        {/* Callout style */}
+                        {block.type === 'callout' && (
+                          <select
+                            value={block.style || 'tip'}
+                            onChange={(e) => updateBlock(idx, { style: e.target.value as any })}
+                            className="bg-[#181818] border border-white/10 rounded-lg px-2 py-1 text-xs text-white focus:outline-none focus:border-[#CCFF00]"
+                          >
+                            <option value="tip">Tip</option>
+                            <option value="info">Info</option>
+                            <option value="warning">Warning</option>
+                            <option value="success">Success</option>
+                          </select>
+                        )}
+
+                        {/* List ordered toggle */}
+                        {block.type === 'list' && (
+                          <label className="flex items-center gap-2 text-xs text-neutral-300 cursor-pointer">
+                            <input
+                              type="checkbox"
+                              checked={block.ordered || false}
+                              onChange={(e) => updateBlock(idx, { ordered: e.target.checked })}
+                              className="rounded border-white/20 bg-[#181818] text-[#CCFF00] focus:ring-0"
+                            />
+                            <span>Ordered list</span>
+                          </label>
+                        )}
+
+                        {/* Video / Embed URL */}
+                        {(block.type === 'video' || block.type === 'embed') && (
+                          <input
+                            type="text"
+                            placeholder={block.type === 'embed' ? 'Embed URL (YouTube, CodePen…)' : 'Video URL (.mp4)'}
+                            value={block.url || ''}
+                            onChange={(e) => updateBlock(idx, { url: e.target.value })}
+                            className="w-full bg-[#181818] border border-white/10 rounded-lg px-3 py-1.5 text-xs text-white font-mono placeholder-neutral-600 focus:outline-none focus:border-[#CCFF00]"
+                          />
+                        )}
+
+                        {/* Main content / image URL */}
+                        {block.type !== 'divider' && block.type !== 'list' && (
+                          <textarea
+                            rows={block.type === 'code' ? 5 : block.type === 'paragraph' ? 3 : 2}
+                            placeholder={
+                              block.type === 'image' ? 'Image URL' :
+                              block.type === 'video' ? 'Fallback description / caption' :
+                              block.type === 'embed' ? 'Description / caption' :
+                              block.type === 'code' ? 'Paste your code here...' :
+                              'Content...'
+                            }
+                            value={block.content}
+                            onChange={(e) => updateBlock(idx, { content: e.target.value })}
+                            className={`w-full bg-[#181818] border border-white/10 rounded-xl p-3 text-xs text-white placeholder-neutral-600 focus:outline-none focus:border-[#CCFF00] ${block.type === 'code' ? 'font-mono' : ''}`}
+                          />
+                        )}
+
+                        {/* Caption for image/video/embed */}
+                        {(block.type === 'image' || block.type === 'video' || block.type === 'embed') && (
+                          <input
+                            type="text"
+                            placeholder="Caption (optional)"
+                            value={block.caption || ''}
+                            onChange={(e) => updateBlock(idx, { caption: e.target.value })}
+                            className="w-full bg-[#181818] border border-white/10 rounded-lg px-3 py-1.5 text-xs text-white placeholder-neutral-600 focus:outline-none focus:border-[#CCFF00]"
+                          />
+                        )}
+
+                        {/* List items editor */}
+                        {block.type === 'list' && (
+                          <div className="space-y-2">
+                            {(block.items || []).map((item, iIdx) => (
+                              <div key={iIdx} className="flex items-center gap-2">
+                                <input
+                                  type="text"
+                                  placeholder={`Item ${iIdx + 1}`}
+                                  value={item}
+                                  onChange={(e) => {
+                                    const items = [...(block.items || [])];
+                                    items[iIdx] = e.target.value;
+                                    updateBlock(idx, { items });
+                                  }}
+                                  className="flex-1 bg-[#181818] border border-white/10 rounded-lg px-3 py-1.5 text-xs text-white placeholder-neutral-600 focus:outline-none focus:border-[#CCFF00]"
+                                />
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    const items = (block.items || []).filter((_, i) => i !== iIdx);
+                                    updateBlock(idx, { items });
+                                  }}
+                                  className="p-1.5 rounded text-red-400 hover:bg-red-500/10"
+                                >
+                                  <Trash2 className="w-3 h-3" />
+                                </button>
+                              </div>
+                            ))}
+                            <button
+                              type="button"
+                              onClick={() => updateBlock(idx, { items: [...(block.items || []), ''] })}
+                              className="text-[10px] font-bold text-[#CCFF00] hover:underline flex items-center gap-1"
+                            >
+                              <Plus className="w-3 h-3" /> Add item
+                            </button>
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* Add block row */}
+                  <div className="flex items-center gap-2 pt-1">
+                    <select
+                      value={newBlockType}
+                      onChange={(e) => setNewBlockType(e.target.value)}
+                      className="bg-[#121212] border border-white/10 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-[#CCFF00]"
+                    >
+                      <option value="paragraph">Paragraph</option>
+                      <option value="heading">Heading</option>
+                      <option value="image">Image</option>
+                      <option value="video">Video</option>
+                      <option value="embed">Embed (YouTube, etc.)</option>
+                      <option value="code">Code Block</option>
+                      <option value="quote">Quote</option>
+                      <option value="list">List</option>
+                      <option value="callout">Callout</option>
+                      <option value="divider">Divider</option>
+                    </select>
+                    <button
+                      type="button"
+                      onClick={() => addBlock(newBlockType)}
+                      className="px-4 py-2 rounded-xl bg-[#CCFF00] text-black text-xs font-black uppercase tracking-wider flex items-center gap-1.5"
+                    >
+                      <Plus className="w-3.5 h-3.5" /> Add Block
+                    </button>
+                    {(blogForm.contentBlocks || []).length > 0 && (
+                      <span className="text-[10px] text-neutral-500 font-mono ml-auto">
+                        {(blogForm.contentBlocks || []).length} block{(blogForm.contentBlocks || []).length !== 1 ? 's' : ''} • ~{calcReadTime(blogForm.contentBlocks || [])}
+                      </span>
+                    )}
+                  </div>
+                </div>
+
                 {/* Section B: SEO & Search Engine Metadata (COMPLETELY FRIENDLY SEO) */}
                 <div className="space-y-5 p-5 bg-[#121212] rounded-2xl border-2 border-[#CCFF00]/30 relative overflow-hidden">
                   <div className="flex items-center justify-between border-b border-white/10 pb-3">
@@ -1869,7 +2192,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                       </div>
                       <div>
                         <h6 className="text-xs font-black uppercase tracking-wider text-white">
-                          2. Search Engine Optimization (SEO) Metadata
+                          3. Search Engine Optimization (SEO) Metadata
                         </h6>
                         <p className="text-[10px] text-neutral-400">
                           Customize exact search page title tags, meta descriptions, target keywords, and open graph social sharing tags.
@@ -2091,6 +2414,16 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                               ) : (
                                 <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-amber-500/10 border border-amber-500/30 text-amber-400">
                                   DEFAULT SEO
+                                </span>
+                              )}
+                              {b.status === 'draft' && (
+                                <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-amber-500/10 border border-amber-500/30 text-amber-400">
+                                  DRAFT
+                                </span>
+                              )}
+                              {b.contentBlocks && b.contentBlocks.length > 0 && (
+                                <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-blue-500/10 border border-blue-500/20 text-blue-400">
+                                  {b.contentBlocks.length} BLOCKS
                                 </span>
                               )}
                             </div>

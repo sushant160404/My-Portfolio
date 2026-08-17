@@ -26,7 +26,7 @@ export const INITIAL_SETTINGS: SiteSettings = {
   videoUrl: '#',
   stats: {
     projectsCompleted: '12K',
-    satisfiedCustomers: '10K',
+    satisfiedCustomers: '1K',
     yearsExperience: '1+',
     clientRating: '4.9/5'
   },
@@ -259,19 +259,153 @@ export const INITIAL_BLOGS: Blog[] = [
     slug: 'mastering-modern-ui-ux-design-systems',
     excerpt: 'Explore how component tokens, high-contrast dark modes, and micro-animations redefine digital experiences.',
     content: 'Building a modern design system requires a harmonic balance between mathematical spacing scales, WCAG accessible contrast, and fluid motion transitions. In this article, we break down the core architecture of Sift UI...',
+    contentBlocks: [
+      {
+        type: 'paragraph',
+        content: 'Building a modern design system requires a harmonic balance between mathematical spacing scales, WCAG accessible contrast, and fluid motion transitions. In this comprehensive guide, we\'ll explore the core architecture of modern design systems and how they shape digital experiences in 2026.'
+      },
+      {
+        type: 'heading',
+        content: 'What Makes a Design System Modern?',
+        level: 2
+      },
+      {
+        type: 'paragraph',
+        content: 'A design system is more than just a collection of UI components. It\'s a living, breathing ecosystem that defines how your brand communicates visually and functionally across all digital touchpoints.'
+      },
+      {
+        type: 'list',
+        items: [
+          'Component Tokens: Reusable design decisions stored as variables',
+          'Accessibility First: WCAG 2.1 AAA compliant color contrasts',
+          'Responsive Patterns: Mobile-first breakpoint strategies',
+          'Motion Language: Consistent animation timing and easing functions',
+          'Documentation: Living style guides that developers actually use'
+        ],
+        ordered: false
+      },
+      {
+        type: 'callout',
+        content: 'Great design systems aren\'t just collections of components—they are living standard operating procedures that align engineering speed with brand expression.',
+        style: 'tip'
+      },
+      {
+        type: 'heading',
+        content: 'Design Tokens: The Foundation',
+        level: 2
+      },
+      {
+        type: 'paragraph',
+        content: 'Design tokens are the atomic building blocks of your design system. They represent design decisions in a platform-agnostic way, making it easy to maintain consistency across web, mobile, and native applications.'
+      },
+      {
+        type: 'code',
+        content: `// Example design tokens in TypeScript
+export const tokens = {
+  colors: {
+    primary: '#CCFF00',
+    primaryRgb: '204, 255, 0',
+    dark: '#0E0E0E',
+    darkAlt: '#141414'
+  },
+  spacing: {
+    xs: '0.25rem',
+    sm: '0.5rem',
+    md: '1rem',
+    lg: '1.5rem',
+    xl: '2rem'
+  },
+  typography: {
+    fontFamily: 'Inter, system-ui, sans-serif',
+    sizes: {
+      xs: '0.75rem',
+      sm: '0.875rem',
+      base: '1rem',
+      lg: '1.125rem',
+      xl: '1.25rem'
+    }
+  }
+};`,
+        language: 'typescript'
+      },
+      {
+        type: 'heading',
+        content: 'Implementing Dark Mode',
+        level: 2
+      },
+      {
+        type: 'paragraph',
+        content: 'High-contrast dark modes are no longer optional—they\'re expected. The key is ensuring proper contrast ratios while maintaining visual hierarchy and readability.'
+      },
+      {
+        type: 'image',
+        content: 'https://images.unsplash.com/photo-1507238691740-187a5b1d37b8?q=80&w=1200&auto=format&fit=crop',
+        caption: 'Modern dark mode UI with proper contrast ratios'
+      },
+      {
+        type: 'quote',
+        content: 'The best interfaces disappear. They get out of the way and let users focus on their goals, not your clever design decisions.'
+      },
+      {
+        type: 'heading',
+        content: 'Component Architecture',
+        level: 2
+      },
+      {
+        type: 'paragraph',
+        content: 'Your component library should be modular, composable, and predictable. Each component should have a single responsibility and work harmoniously with others.'
+      },
+      {
+        type: 'list',
+        items: [
+          'Atomic Design Methodology',
+          'Compound Component Pattern',
+          'Controlled vs Uncontrolled Components',
+          'Prop Forwarding and Polymorphism',
+          'Accessibility Attributes (ARIA)'
+        ],
+        ordered: true
+      },
+      {
+        type: 'divider'
+      },
+      {
+        type: 'callout',
+        content: 'Always test your components with keyboard navigation and screen readers. Accessibility is not a feature—it\'s a requirement.',
+        style: 'warning'
+      },
+      {
+        type: 'heading',
+        content: 'Conclusion',
+        level: 2
+      },
+      {
+        type: 'paragraph',
+        content: 'Modern design systems are the backbone of scalable digital products. By investing in proper tokens, documentation, and accessibility from day one, you set your team up for long-term success.'
+      }
+    ],
     featuredImage: 'https://images.unsplash.com/photo-1507238691740-187a5b1d37b8?q=80&w=800&auto=format&fit=crop',
     category: 'UI/UX Design',
-    tags: ['Design Systems', 'Figma', 'Tailwind', 'UX'],
+    tags: ['Design Systems', 'Figma', 'Tailwind', 'UX', 'Accessibility'],
+    author: {
+      name: 'Sushant Namurte',
+      role: 'Senior UI/UX Engineer',
+      bio: 'Passionate about crafting accessible, scalable design systems that bridge the gap between design and engineering.',
+      avatar: 'https://ui-avatars.com/api/?name=Sushant+Namurte&background=CCFF00&color=000&size=128'
+    },
     publishedAt: '2026-07-28',
-    readTime: '5 min read',
+    updatedAt: '2026-08-10',
+    readTime: '8 min read',
     featured: true,
     views: 1420,
+    likes: 89,
     seoTitle: 'Mastering Modern UI/UX Design Systems in 2026 | Sift Media',
     metaDescription: 'Learn how component design tokens, high-contrast dark mode palettes, and fluid CSS animations elevate modern web design systems in 2026.',
     keywords: ['UI UX Design System', 'Figma Tokens', 'Tailwind CSS', 'User Experience 2026'],
     canonicalUrl: 'https://siftmedia.com/blog/mastering-modern-ui-ux-design-systems',
     ogImage: 'https://images.unsplash.com/photo-1507238691740-187a5b1d37b8?q=80&w=1200&auto=format&fit=crop',
-    noIndex: false
+    noIndex: false,
+    tableOfContents: true
   },
   {
     id: 'b2',
@@ -282,10 +416,16 @@ export const INITIAL_BLOGS: Blog[] = [
     featuredImage: 'https://images.unsplash.com/photo-1555066931-4365d14bab8c?q=80&w=800&auto=format&fit=crop',
     category: 'Development',
     tags: ['Node.js', 'Express', 'PostgreSQL', 'API'],
+    author: {
+      name: 'Sushant Namurte',
+      role: 'Full-Stack Engineer',
+      bio: 'Building high-performance web applications with modern JavaScript frameworks and cloud infrastructure.'
+    },
     publishedAt: '2026-08-04',
     readTime: '7 min read',
     featured: true,
     views: 980,
+    likes: 67,
     seoTitle: 'Building Scalable REST APIs with Node.js & Express | Sushant Namurte',
     metaDescription: 'Comprehensive guide to building enterprise Node.js & Express APIs with JWT security, connection pooling, and RESTful routing best practices.',
     keywords: ['Node.js REST API', 'Express.js Backend', 'PostgreSQL Pooling', 'Web API Security'],

@@ -21,9 +21,9 @@ let siteSettings = {
   cvUrl: '#download-cv',
   videoUrl: 'https://www.youtube.com/embed/dQw4w9WgXcQ',
   stats: {
-    projectsCompleted: '12K',
-    satisfiedCustomers: '10K',
-    yearsExperience: '10+',
+    projectsCompleted: '1K',
+    satisfiedCustomers: '1K',
+    yearsExperience: '1+',
     clientRating: '4.9/5'
   },
   socialLinks: {
@@ -228,6 +228,103 @@ app.post('/api/chat/test-key', async (req, res) => {
   } catch (err: any) {
     res.status(500).json({ success: false, message: `Test failed: ${err.message}` });
   }
+});
+
+// Blog CRUD REST endpoints (in-memory fallback; primary store is Firestore)
+interface BlogPost {
+  id: string;
+  title: string;
+  slug: string;
+  excerpt?: string;
+  content?: string;
+  contentBlocks?: any[];
+  featuredImage?: string;
+  category?: string;
+  tags?: string[];
+  publishedAt?: string;
+  updatedAt?: string;
+  readTime?: string;
+  featured?: boolean;
+  status?: 'published' | 'draft';
+  tableOfContents?: boolean;
+  seriesId?: string;
+  seriesTitle?: string;
+  seriesOrder?: number;
+  views?: number;
+  likes?: number;
+  seoTitle?: string;
+  metaDescription?: string;
+  keywords?: string[];
+  canonicalUrl?: string;
+  ogImage?: string;
+  noIndex?: boolean;
+  author?: { name: string; avatar?: string; bio?: string; role?: string };
+}
+
+let blogs: BlogPost[] = [];
+
+// GET all blogs (optionally filter by status)
+app.get('/api/blogs', (req, res) => {
+  const { status, category, featured } = req.query;
+  let result = blogs;
+  if (status) result = result.filter(b => b.status === status);
+  else result = result.filter(b => (b.status || 'published') === 'published');
+  if (category) result = result.filter(b => b.category === category);
+  if (featured === 'true') result = result.filter(b => b.featured);
+  res.json({ success: true, blogs: result });
+});
+
+// GET single blog by id or slug
+app.get('/api/blogs/:idOrSlug', (req, res) => {
+  const { idOrSlug } = req.params;
+  const blog = blogs.find(b => b.id === idOrSlug || b.slug === idOrSlug);
+  if (!blog) { res.status(404).json({ error: 'Blog post not found' }); return; }
+  // Increment view count
+  blog.views = (blog.views || 0) + 1;
+  res.json({ success: true, blog });
+});
+
+// POST create blog
+app.post('/api/blogs', (req, res) => {
+  const body = req.body;
+  if (!body.title) { res.status(400).json({ error: 'title is required' }); return; }
+  const id = body.id || `b_${Date.now()}`;
+  const slug = body.slug || body.title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
+  const blog: BlogPost = {
+    ...body,
+    id,
+    slug,
+    publishedAt: body.publishedAt || new Date().toISOString().split('T')[0],
+    updatedAt: new Date().toISOString().split('T')[0],
+    status: body.status || 'published',
+    views: body.views || 0,
+    likes: body.likes || 0,
+    seoTitle: body.seoTitle || `${body.title} | Sift Media`,
+    metaDescription: body.metaDescription || body.excerpt || '',
+    canonicalUrl: body.canonicalUrl || `https://siftmedia.com/blog/${slug}`,
+    ogImage: body.ogImage || body.featuredImage || '',
+  };
+  // Replace if exists
+  const existing = blogs.findIndex(b => b.id === id);
+  if (existing >= 0) blogs[existing] = blog;
+  else blogs.unshift(blog);
+  res.status(201).json({ success: true, blog });
+});
+
+// PUT update blog
+app.put('/api/blogs/:id', (req, res) => {
+  const idx = blogs.findIndex(b => b.id === req.params.id);
+  if (idx < 0) { res.status(404).json({ error: 'Blog post not found' }); return; }
+  blogs[idx] = { ...blogs[idx], ...req.body, id: req.params.id, updatedAt: new Date().toISOString().split('T')[0] };
+  res.json({ success: true, blog: blogs[idx] });
+});
+
+// DELETE blog
+app.delete('/api/blogs/:id', (req, res) => {
+  const idx = blogs.findIndex(b => b.id === req.params.id);
+  if (idx < 0) { res.status(404).json({ error: 'Blog post not found' }); return; }
+  blogs.splice(idx, 1);
+  res.json({ success: true });
 });
 
 // Admin Authentication endpoint simulation
