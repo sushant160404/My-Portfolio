@@ -19,6 +19,7 @@ import { BlogSection } from './components/BlogSection';
 import { CommandPalette } from './components/CommandPalette';
 import { AdminPanel } from './components/AdminPanel';
 import { ChatBot } from './components/ChatBot';
+import { NotFoundPage } from './components/NotFoundPage';
 
 import { Project, Service, Skill, Testimonial, Blog, SiteSettings } from './types';
 import {
@@ -271,6 +272,19 @@ function AppContent() {
             {/* Newsletter Subscription */}
             <NewsletterSection />
             
+            <Footer settings={settings} />
+          </>
+        } />
+
+        {/* 404 Not Found - Catch all undefined routes */}
+        <Route path="*" element={
+          <>
+            <Header
+              onOpenAdmin={() => navigate('/admin')}
+              onOpenSearch={() => setCommandPaletteOpen(true)}
+              onNavigateHome={() => navigate('/')}
+            />
+            <NotFoundPage />
             <Footer settings={settings} />
           </>
         } />
