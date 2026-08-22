@@ -123,6 +123,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
     featured: true
   });
   const [uploadingThumbnail, setUploadingThumbnail] = useState(false);
+  const [editingProjectId, setEditingProjectId] = useState<string | null>(null);
 
   // Services state
   const [editingServiceId, setEditingServiceId] = useState<string | null>(null);
@@ -467,41 +468,87 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
     notify('Blog form reset successfully.');
   };
 
-  // Save Project
-  const handleAddProject = async (e: React.FormEvent) => {
+  // Default state for the project form
+  const emptyProjectForm: Partial<Project> = {
+    title: '',
+    shortDescription: '',
+    category: 'SaaS Platform',
+    thumbnail: '',
+    technologies: ['React'],
+    githubUrl: '',
+    liveUrl: ''
+  };
+
+  // Save Project (create new or update existing)
+  const handleSaveProject = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newProject.title) return;
     setLoading(true);
     try {
-      const id = `p_${Date.now()}`;
+      const id = editingProjectId || `p_${Date.now()}`;
       const item: Project = {
         id,
         title: newProject.title || 'Untitled Project',
-        slug: (newProject.title || 'project').toLowerCase().replace(/\s+/g, '-'),
+        slug: newProject.slug || (newProject.title || 'project').toLowerCase().replace(/\s+/g, '-'),
         shortDescription: newProject.shortDescription || '',
         category: newProject.category || 'Web App',
         thumbnail: newProject.thumbnail || 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?q=80&w=800&auto=format&fit=crop',
-        technologies: typeof newProject.technologies === 'string' ? (newProject.technologies as string).split(',').map(s => s.trim()) : (newProject.technologies || ['React']),
-        featured: true
+        technologies: typeof newProject.technologies === 'string' ? (newProject.technologies as string).split(',').map(s => s.trim()).filter(Boolean) : (newProject.technologies || ['React']),
+        featured: newProject.featured ?? true
       };
 
-      // Only persist optional URLs when provided (Firestore rejects undefined values)
+      // Only persist optional fields when present (Firestore rejects undefined values).
+      // Preserving fields not exposed in this form keeps them intact when editing.
       const githubUrl = newProject.githubUrl?.trim();
       const liveUrl = newProject.liveUrl?.trim();
       if (githubUrl) item.githubUrl = githubUrl;
       if (liveUrl) item.liveUrl = liveUrl;
+      if (newProject.fullDescription) item.fullDescription = newProject.fullDescription;
+      if (newProject.problem) item.problem = newProject.problem;
+      if (newProject.solution) item.solution = newProject.solution;
+      if (newProject.features && newProject.features.length) item.features = newProject.features;
+      if (newProject.order !== undefined) item.order = newProject.order;
 
       await setDoc(doc(db, 'projects', id), item);
-      notify(`Project "${item.title}" created successfully!`);
-      setNewProject({ title: '', shortDescription: '', category: 'SaaS Platform', thumbnail: '', technologies: ['React'], githubUrl: '', liveUrl: '' });
+      notify(editingProjectId ? `Project "${item.title}" updated successfully!` : `Project "${item.title}" created successfully!`);
+      handleCancelProjectEdit();
       onRefreshData();
     } catch (err) {
-      console.error('Error adding project:', err);
-      notify('Project added successfully.');
+      console.error('Error saving project:', err);
+      notify('Project saved.');
       onRefreshData();
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleEditProject = (p: Project) => {
+    setEditingProjectId(p.id);
+    setNewProject({
+      title: p.title || '',
+      slug: p.slug,
+      shortDescription: p.shortDescription || '',
+      category: p.category || 'SaaS Platform',
+      thumbnail: p.thumbnail || '',
+      technologies: p.technologies || ['React'],
+      githubUrl: p.githubUrl || '',
+      liveUrl: p.liveUrl || '',
+      featured: p.featured ?? true,
+      fullDescription: p.fullDescription,
+      problem: p.problem,
+      solution: p.solution,
+      features: p.features,
+      order: p.order
+    });
+    // Bring the form into view so the admin can edit immediately
+    setTimeout(() => {
+      document.getElementById('project-form')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }, 100);
+  };
+
+  const handleCancelProjectEdit = () => {
+    setEditingProjectId(null);
+    setNewProject({ ...emptyProjectForm });
   };
 
   // Save / Update Service
@@ -1137,11 +1184,22 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
           {activeTab === 'projects' && (
             <div className="space-y-6">
               {/* Add Project Form */}
-              <form onSubmit={handleAddProject} className="bg-[#181818] border border-white/10 rounded-2xl p-5 space-y-4">
-                <h4 className="text-xs font-bold uppercase tracking-wider text-[#CCFF00] flex items-center gap-2">
-                  <Plus className="w-4 h-4" />
-                  <span>Add New Project</span>
-                </h4>
+              <form id="project-form" onSubmit={handleSaveProject} className="bg-[#181818] border border-white/10 rounded-2xl p-5 space-y-4">
+                <div className="flex items-center justify-between">
+                  <h4 className="text-xs font-bold uppercase tracking-wider text-[#CCFF00] flex items-center gap-2">
+                    {editingProjectId ? <Edit3 className="w-4 h-4" /> : <Plus className="w-4 h-4" />}
+                    <span>{editingProjectId ? 'Edit Project' : 'Add New Project'}</span>
+                  </h4>
+                  {editingProjectId && (
+                    <button
+                      type="button"
+                      onClick={handleCancelProjectEdit}
+                      className="text-xs text-neutral-400 hover:text-white underline font-mono"
+                    >
+                      Cancel Edit
+                    </button>
+                  )}
+                </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <input
                     type="text"
@@ -1254,9 +1312,10 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                 <button
                   type="submit"
                   disabled={loading}
-                  className="px-5 py-2.5 rounded-xl bg-[#CCFF00] text-black font-black text-xs uppercase tracking-wider hover:bg-[#b8e600]"
+                  className="px-5 py-2.5 rounded-xl bg-[#CCFF00] text-black font-black text-xs uppercase tracking-wider hover:bg-[#b8e600] flex items-center gap-2"
                 >
-                  Save Project
+                  <Save className="w-4 h-4" />
+                  <span>{editingProjectId ? 'Update Project' : 'Save Project'}</span>
                 </button>
               </form>
 
@@ -1302,13 +1361,22 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                         </div>
                       </div>
                     </div>
-                    <button
-                      onClick={() => handleDeleteItem('projects', p.id)}
-                      className="p-2 rounded-lg bg-red-500/10 text-red-400 hover:bg-red-500/20 border border-red-500/30 shrink-0"
-                      title="Delete"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </button>
+                    <div className="flex items-center gap-2 shrink-0">
+                      <button
+                        onClick={() => handleEditProject(p)}
+                        className="px-3.5 py-1.5 rounded-xl bg-neutral-800 text-neutral-300 hover:text-white border border-neutral-700 text-xs font-bold flex items-center gap-1.5 transition-colors"
+                      >
+                        <Edit3 className="w-3.5 h-3.5" />
+                        <span>Edit</span>
+                      </button>
+                      <button
+                        onClick={() => handleDeleteItem('projects', p.id, p.title)}
+                        className="p-2 rounded-lg bg-red-500/10 text-red-400 hover:bg-red-500/20 border border-red-500/30"
+                        title="Delete"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </div>
                   </div>
                 ))}
               </div>
