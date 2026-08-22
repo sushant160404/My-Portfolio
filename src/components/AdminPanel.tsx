@@ -14,7 +14,7 @@ import {
 import { INITIAL_PROJECTS, INITIAL_SERVICES, INITIAL_SKILLS, INITIAL_TESTIMONIALS, INITIAL_BLOGS, INITIAL_SETTINGS } from '../lib/initialData';
 import { db } from '../lib/firebase';
 import { collection, doc, setDoc, deleteDoc, getDocs } from 'firebase/firestore';
-import { uploadFileToStorage, fileToDataURL, addCacheBuster } from '../lib/uploadHelper';
+import { uploadFileToStorage, fileToDataURL, compressImageToDataURL, addCacheBuster } from '../lib/uploadHelper';
 
 interface AdminPanelProps {
   isOpen: boolean;
@@ -1281,15 +1281,29 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                           if (!file) return;
                           setUploadingThumbnail(true);
                           try {
+                            // 1) Show an instant local preview, compressed so it
+                            //    stays small enough to save inline if the cloud
+                            //    upload isn't available.
+                            const localPreview = await compressImageToDataURL(file, 1000, 0.82);
+                            if (localPreview) {
+                              setNewProject((prev) => ({ ...prev, thumbnail: localPreview }));
+                            }
                             notify('Uploading project image...');
-                            const url = await uploadFileToStorage(file, 'project_thumbnails');
+                            // 2) Try Firebase Storage in the background; give up
+                            //    after 15s so a misconfigured bucket can't leave
+                            //    the button stuck on "Uploading...".
+                            const url = await Promise.race<string>([
+                              uploadFileToStorage(file, 'project_thumbnails'),
+                              new Promise<string>((_, reject) =>
+                                setTimeout(() => reject(new Error('upload-timeout')), 15000)
+                              ),
+                            ]);
                             setNewProject((prev) => ({ ...prev, thumbnail: url }));
-                            notify('Project image uploaded successfully!');
+                            notify('Project image uploaded to cloud!');
                           } catch (error) {
-                            // Fallback to inline data URL if Firebase Storage upload fails
-                            const dataUrl = await fileToDataURL(file);
-                            setNewProject((prev) => ({ ...prev, thumbnail: dataUrl }));
-                            notify('Image loaded (local preview)');
+                            // Storage failed/timed out — keep the local preview
+                            // already set above; it will be saved with the project.
+                            notify('Image ready (saved with your project)');
                           } finally {
                             setUploadingThumbnail(false);
                             e.target.value = '';

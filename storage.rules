@@ -1,0 +1,15 @@
+rules_version = '2';
+
+// Firebase Storage security rules.
+// The admin panel authenticates with a custom password (not Firebase Auth),
+// so request.auth is null on uploads. These demo rules allow public read and
+// write so image/CV uploads from the admin panel succeed. Tighten before a
+// real production launch (e.g. gate writes behind Firebase Auth).
+service firebase.storage {
+  match /b/{bucket}/o {
+    match /{allPaths=**} {
+      allow read: if true;
+      allow write: if true;
+    }
+  }
+}
