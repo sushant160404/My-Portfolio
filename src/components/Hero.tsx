@@ -1,5 +1,5 @@
 import React from 'react';
-import { Download, Play, CheckCircle2, ArrowDownRight, Sparkles } from 'lucide-react';
+import { Download, CheckCircle2, ArrowDownRight, Sparkles } from 'lucide-react';
 import { SiteSettings } from '../types';
 import { addCacheBuster } from '../lib/uploadHelper';
 
@@ -119,17 +119,6 @@ export const Hero: React.FC<HeroProps> = ({ settings, onOpenVideo }) => {
                 <Download className="w-4 h-4" />
                 <span>DOWNLOAD CV</span>
               </a>
-
-              <button
-                onClick={onOpenVideo}
-                id="play-video-hero-btn"
-                className="inline-flex items-center gap-3 px-6 py-3.5 rounded-full bg-neutral-900 border border-neutral-800 hover:border-[#CCFF00] text-white text-xs font-bold uppercase tracking-wider transition-all group"
-              >
-                <div className="w-7 h-7 rounded-full bg-[#CCFF00] text-black flex items-center justify-center group-hover:scale-110 transition-transform">
-                  <Play className="w-3.5 h-3.5 fill-black translate-x-0.5" />
-                </div>
-                <span>PLAY VIDEO</span>
-              </button>
             </div>
 
             {/* Decorative Sift Star Geometric Icon */}

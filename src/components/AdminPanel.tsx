@@ -794,7 +794,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
               </div>
             </div>
 
-            {/* Options & Demo Credential Helper */}
+            {/* Options */}
             <div className="flex items-center justify-between text-xs pt-1">
               <label className="flex items-center gap-2 cursor-pointer text-neutral-400 hover:text-white transition-colors">
                 <input
@@ -805,11 +805,6 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                 />
                 <span className="text-[11px]">Keep Logged In</span>
               </label>
-
-              <div className="text-[10px] font-mono text-[#CCFF00] bg-[#CCFF00]/10 px-2.5 py-1 rounded border border-[#CCFF00]/20 flex items-center gap-1">
-                <Key className="w-3 h-3" />
-                <span>Pass: <strong>{settings.adminPassword || 'admin'}</strong></span>
-              </div>
             </div>
 
             {/* Submit Button */}
