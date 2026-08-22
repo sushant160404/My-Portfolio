@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
 import {
   X, Shield, Plus, Trash2, Edit3, RefreshCw, Mail, Folder,
   Layers, Award, Check, Settings, Save, Sparkles, Star,
@@ -15,6 +16,10 @@ import { INITIAL_PROJECTS, INITIAL_SERVICES, INITIAL_SKILLS, INITIAL_TESTIMONIAL
 import { db } from '../lib/firebase';
 import { collection, doc, setDoc, deleteDoc, getDocs } from 'firebase/firestore';
 import { uploadFileToStorage, fileToDataURL, compressImageToDataURL, addCacheBuster } from '../lib/uploadHelper';
+
+// Admin sections that map to URL routes: /admin/<tab> (e.g. /admin/projects)
+const ADMIN_TABS = ['dashboard', 'projects', 'services', 'skills', 'testimonials', 'blogs', 'messages', 'media', 'theme', 'settings', 'chatbot'] as const;
+type AdminTab = typeof ADMIN_TABS[number];
 
 interface AdminPanelProps {
   isOpen: boolean;
@@ -39,7 +44,17 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
   settings,
   onRefreshData
 }) => {
-  const [activeTab, setActiveTab] = useState<'dashboard' | 'projects' | 'services' | 'skills' | 'testimonials' | 'blogs' | 'messages' | 'media' | 'theme' | 'settings' | 'chatbot'>('dashboard');
+  const navigate = useNavigate();
+  const { tab } = useParams<{ tab?: string }>();
+  // Active tab is derived from the URL (/admin/:tab) so sections are deep-linkable
+  const activeTab: AdminTab = ADMIN_TABS.includes(tab as AdminTab) ? (tab as AdminTab) : 'dashboard';
+  const setActiveTab = (id: string) => navigate(`/admin/${id}`);
+  // Normalize /admin and any unknown tab to /admin/dashboard so the URL always reflects the section
+  useEffect(() => {
+    if (!tab || !ADMIN_TABS.includes(tab as AdminTab)) {
+      navigate('/admin/dashboard', { replace: true });
+    }
+  }, [tab, navigate]);
   const [messages, setMessages] = useState<ContactMessage[]>([]);
   const [loading, setLoading] = useState(false);
   const [seeding, setSeeding] = useState(false);

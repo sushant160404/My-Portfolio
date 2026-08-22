@@ -1,13 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { Search, Shield, ArrowUpRight, Menu, X } from 'lucide-react';
+import { Search, ArrowUpRight, Menu, X } from 'lucide-react';
 
 interface HeaderProps {
-  onOpenAdmin: () => void;
   onOpenSearch: () => void;
   onNavigateHome?: () => void;
 }
 
-export const Header: React.FC<HeaderProps> = ({ onOpenAdmin, onOpenSearch, onNavigateHome }) => {
+export const Header: React.FC<HeaderProps> = ({ onOpenSearch, onNavigateHome }) => {
   const [scrolled, setScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
@@ -96,16 +95,6 @@ export const Header: React.FC<HeaderProps> = ({ onOpenAdmin, onOpenSearch, onNav
             </kbd>
           </button>
 
-          {/* Admin CMS Access */}
-          <button
-            onClick={onOpenAdmin}
-            id="admin-panel-trigger"
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#CCFF00]/10 border border-[#CCFF00]/30 text-[#CCFF00] text-xs font-bold hover:bg-[#CCFF00]/20 transition-all"
-          >
-            <Shield className="w-3.5 h-3.5" />
-            <span>Admin CMS</span>
-          </button>
-
           {/* Hire Me CTA */}
           <a
             href="#contact"
@@ -150,16 +139,6 @@ export const Header: React.FC<HeaderProps> = ({ onOpenAdmin, onOpenSearch, onNav
             ))}
           </nav>
           <div className="pt-4 border-t border-white/10 flex flex-col gap-3">
-            <button
-              onClick={() => {
-                setMobileMenuOpen(false);
-                onOpenAdmin();
-              }}
-              className="w-full flex items-center justify-center gap-2 py-2.5 rounded-lg bg-[#CCFF00]/10 border border-[#CCFF00]/30 text-[#CCFF00] font-bold text-xs uppercase"
-            >
-              <Shield className="w-4 h-4" />
-              <span>Admin CMS Portal</span>
-            </button>
             <a
               href="#contact"
               onClick={() => setMobileMenuOpen(false)}

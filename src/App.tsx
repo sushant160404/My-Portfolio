@@ -185,29 +185,32 @@ function AppContent() {
     }
   }, [settings.theme]);
 
+  // Admin panel element shared by both /admin and /admin/:tab routes
+  const adminElement = (
+    <AdminPanel
+      isOpen={true}
+      onClose={() => navigate('/')}
+      projects={projects}
+      services={services}
+      skills={skills}
+      testimonials={testimonials}
+      blogs={blogs}
+      settings={settings}
+      onRefreshData={loadPortfolioData}
+    />
+  );
+
   return (
     <div className="min-h-screen bg-[#0E0E0E] text-white selection:bg-[#CCFF00] selection:text-black font-sans antialiased">
       <Routes>
-        {/* Admin Panel Route - Full screen without header */}
-        <Route path="/admin" element={
-          <AdminPanel
-            isOpen={true}
-            onClose={() => navigate('/')}
-            projects={projects}
-            services={services}
-            skills={skills}
-            testimonials={testimonials}
-            blogs={blogs}
-            settings={settings}
-            onRefreshData={loadPortfolioData}
-          />
-        } />
+        {/* Admin Panel Route - Full screen without header. :tab drives the active section (e.g. /admin/projects) */}
+        <Route path="/admin" element={adminElement} />
+        <Route path="/admin/:tab" element={adminElement} />
 
         {/* Blog Detail Route */}
         <Route path="/blog/:blogId" element={
           <>
             <Header
-              onOpenAdmin={() => navigate('/admin')}
               onOpenSearch={() => setCommandPaletteOpen(true)}
               onNavigateHome={() => navigate('/')}
             />
@@ -223,7 +226,6 @@ function AppContent() {
         <Route path="/project/:projectId" element={
           <>
             <Header
-              onOpenAdmin={() => navigate('/admin')}
               onOpenSearch={() => setCommandPaletteOpen(true)}
               onNavigateHome={() => navigate('/')}
             />
@@ -239,7 +241,6 @@ function AppContent() {
         <Route path="/" element={
           <>
             <Header
-              onOpenAdmin={() => navigate('/admin')}
               onOpenSearch={() => setCommandPaletteOpen(true)}
               onNavigateHome={() => navigate('/')}
             />
@@ -287,7 +288,6 @@ function AppContent() {
         <Route path="*" element={
           <>
             <Header
-              onOpenAdmin={() => navigate('/admin')}
               onOpenSearch={() => setCommandPaletteOpen(true)}
               onNavigateHome={() => navigate('/')}
             />

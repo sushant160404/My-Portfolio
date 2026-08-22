@@ -1,5 +1,6 @@
 import React from 'react';
-import { Facebook, Instagram, Twitter, Linkedin, Dribbble, ArrowUp } from 'lucide-react';
+import { Facebook, Instagram, Twitter, Linkedin, Dribbble, ArrowUp, Shield } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import { SiteSettings } from '../types';
 
 interface FooterProps {
@@ -7,6 +8,8 @@ interface FooterProps {
 }
 
 export const Footer: React.FC<FooterProps> = ({ settings }) => {
+  const navigate = useNavigate();
+
   const scrollToTop = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
@@ -83,13 +86,22 @@ export const Footer: React.FC<FooterProps> = ({ settings }) => {
         {/* Bottom Copyright & Back to Top */}
         <div className="pt-8 border-t border-white/5 flex flex-col sm:flex-row items-center justify-between gap-4 text-center sm:text-left text-xs text-neutral-500 font-medium">
           <p>© 2026 Personal Portfolio. All Rights Reserved Designed By Sushant Namurte</p>
-          <button
-            onClick={scrollToTop}
-            className="inline-flex items-center gap-1.5 text-neutral-400 hover:text-[#CCFF00] transition-colors"
-          >
-            <span>Back to Top</span>
-            <ArrowUp className="w-3.5 h-3.5" />
-          </button>
+          <div className="flex items-center gap-4">
+            <button
+              onClick={() => navigate('/admin')}
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#CCFF00]/10 border border-[#CCFF00]/30 text-[#CCFF00] font-bold hover:bg-[#CCFF00]/20 transition-all"
+            >
+              <Shield className="w-3.5 h-3.5" />
+              <span>Admin CMS</span>
+            </button>
+            <button
+              onClick={scrollToTop}
+              className="inline-flex items-center gap-1.5 text-neutral-400 hover:text-[#CCFF00] transition-colors"
+            >
+              <span>Back to Top</span>
+              <ArrowUp className="w-3.5 h-3.5" />
+            </button>
+          </div>
         </div>
 
       </div>
