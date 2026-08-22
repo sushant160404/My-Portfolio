@@ -2,6 +2,17 @@ import { storage } from './firebase';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 
 /**
+ * Add cache busting parameter to image URL to force browser refresh
+ * @param url - The image URL
+ * @returns URL with cache busting parameter
+ */
+export function addCacheBuster(url: string): string {
+  if (!url) return url;
+  const separator = url.includes('?') ? '&' : '?';
+  return `${url}${separator}t=${Date.now()}`;
+}
+
+/**
  * Upload a file to Firebase Storage and return the download URL
  * @param file - The file to upload
  * @param folder - The storage folder path (e.g., 'images', 'cv')

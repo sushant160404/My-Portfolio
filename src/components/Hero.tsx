@@ -1,6 +1,7 @@
 import React from 'react';
 import { Download, Play, CheckCircle2, ArrowDownRight, Sparkles } from 'lucide-react';
 import { SiteSettings } from '../types';
+import { addCacheBuster } from '../lib/uploadHelper';
 
 interface HeroProps {
   settings: SiteSettings;
@@ -55,7 +56,7 @@ export const Hero: React.FC<HeroProps> = ({ settings, onOpenVideo }) => {
               <div className="absolute inset-2 rounded-t-full border border-[#CCFF00]/20 pointer-events-none" />
               
               <img
-                src={settings.profileImageUrl || "/profile.jpg"}
+                src={addCacheBuster(settings.profileImageUrl || "/profile.jpg")}
                 alt={settings.name}
                 className="w-full h-full object-cover object-top filter grayscale contrast-125 hover:grayscale-0 transition-all duration-700"
                 onError={(e) => {

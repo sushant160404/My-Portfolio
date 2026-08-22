@@ -5,7 +5,7 @@ import {
   Palette, Paintbrush, CheckCircle2, Image, FileText, Upload,
   Download, FileUp, Eye, EyeOff, Link, UploadCloud, Lock, Unlock,
   Key, ShieldCheck, LogOut, AlertTriangle, UserCheck, ShieldAlert,
-  Search, Globe, Share2, ExternalLink, FileCode, Bot, Zap, Cpu, MessageSquare,
+  Search, Globe, Github, Share2, ExternalLink, FileCode, Bot, Zap, Cpu, MessageSquare,
   LayoutDashboard, ArrowLeft, BarChart2, Activity, ArrowRight
 } from 'lucide-react';
 import {
@@ -14,7 +14,7 @@ import {
 import { INITIAL_PROJECTS, INITIAL_SERVICES, INITIAL_SKILLS, INITIAL_TESTIMONIALS, INITIAL_BLOGS, INITIAL_SETTINGS } from '../lib/initialData';
 import { db } from '../lib/firebase';
 import { collection, doc, setDoc, deleteDoc, getDocs } from 'firebase/firestore';
-import { uploadFileToStorage, fileToDataURL } from '../lib/uploadHelper';
+import { uploadFileToStorage, fileToDataURL, addCacheBuster } from '../lib/uploadHelper';
 
 interface AdminPanelProps {
   isOpen: boolean;
@@ -118,8 +118,11 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
     category: 'SaaS Platform',
     thumbnail: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?q=80&w=800&auto=format&fit=crop',
     technologies: ['React', 'Node.js', 'PostgreSQL'],
+    githubUrl: '',
+    liveUrl: '',
     featured: true
   });
+  const [uploadingThumbnail, setUploadingThumbnail] = useState(false);
 
   // Services state
   const [editingServiceId, setEditingServiceId] = useState<string | null>(null);
@@ -320,74 +323,78 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
   // Blog & SEO Save Handler
   const handleSaveBlog = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!blogForm.title) return;
+    
+    // Enhanced validation
+    if (!blogForm.title?.trim()) {
+      notify('Blog title is required');
+      return;
+    }
+    
+    if (!blogForm.category?.trim()) {
+      notify('Blog category is required');
+      return;
+    }
+
     setLoading(true);
     try {
       const id = editingBlogId || `b_${Date.now()}`;
-      const generatedSlug = blogForm.slug || blogForm.title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
-      const autoSeoTitle = blogForm.seoTitle || `${blogForm.title} | Sift Media`;
-      const autoMetaDesc = blogForm.metaDescription || (blogForm.excerpt ? (blogForm.excerpt.length > 155 ? blogForm.excerpt.substring(0, 155) + '...' : blogForm.excerpt) : `${blogForm.title} - Read article on Sift Media.`);
+      const generatedSlug = (blogForm.slug?.trim() || blogForm.title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, ''));
+      const autoSeoTitle = blogForm.seoTitle?.trim() || `${blogForm.title} | Sift Media`;
+      const autoMetaDesc = blogForm.metaDescription?.trim() || (blogForm.excerpt ? (blogForm.excerpt.length > 155 ? blogForm.excerpt.substring(0, 155) + '...' : blogForm.excerpt) : `${blogForm.title} - Read article on Sift Media.`);
 
       const blogItem: Blog = {
         id,
-        title: blogForm.title,
+        title: blogForm.title.trim(),
         slug: generatedSlug,
-        excerpt: blogForm.excerpt || '',
-        content: blogForm.content || '',
+        excerpt: blogForm.excerpt?.trim() || '',
+        content: blogForm.content?.trim() || '',
         contentBlocks: blogForm.contentBlocks || [],
-        featuredImage: blogForm.featuredImage || 'https://images.unsplash.com/photo-1507238691740-187a5b1d37b8?q=80&w=800&auto=format&fit=crop',
-        category: blogForm.category || 'UI/UX Design',
-        tags: typeof blogForm.tags === 'string' ? (blogForm.tags as string).split(',').map(s => s.trim()) : (blogForm.tags || ['Design']),
+        featuredImage: blogForm.featuredImage?.trim() || 'https://images.unsplash.com/photo-1507238691740-187a5b1d37b8?q=80&w=800&auto=format&fit=crop',
+        category: blogForm.category?.trim() || 'UI/UX Design',
+        tags: typeof blogForm.tags === 'string' ? (blogForm.tags as string).split(',').map(s => s.trim()).filter(Boolean) : (Array.isArray(blogForm.tags) ? blogForm.tags.filter(Boolean) : ['Design']),
         publishedAt: blogForm.publishedAt || new Date().toISOString().split('T')[0],
-        readTime: blogForm.readTime || calcReadTime(blogForm.contentBlocks || []),
+        readTime: blogForm.readTime?.trim() || calcReadTime(blogForm.contentBlocks || []),
         featured: blogForm.featured ?? true,
         status: blogForm.status || 'published',
         tableOfContents: blogForm.tableOfContents ?? false,
-        seriesId: blogForm.seriesId || undefined,
-        seriesTitle: blogForm.seriesTitle || undefined,
+        seriesId: blogForm.seriesId?.trim() || undefined,
+        seriesTitle: blogForm.seriesTitle?.trim() || undefined,
         seriesOrder: blogForm.seriesOrder || undefined,
-        views: blogForm.views || 100,
+        views: blogForm.views || (editingBlogId ? undefined : 0), // Keep existing views for updates, start with 0 for new posts
         seoTitle: autoSeoTitle,
         metaDescription: autoMetaDesc,
-        keywords: typeof blogForm.keywords === 'string' ? (blogForm.keywords as string).split(',').map(s => s.trim()) : (blogForm.keywords || ['Sift Media']),
-        canonicalUrl: blogForm.canonicalUrl || `https://siftmedia.com/blog/${generatedSlug}`,
-        ogImage: blogForm.ogImage || blogForm.featuredImage || 'https://images.unsplash.com/photo-1507238691740-187a5b1d37b8?q=80&w=1200&auto=format&fit=crop',
-        noIndex: blogForm.noIndex ?? false
+        keywords: typeof blogForm.keywords === 'string' ? (blogForm.keywords as string).split(',').map(s => s.trim()).filter(Boolean) : (Array.isArray(blogForm.keywords) ? blogForm.keywords.filter(Boolean) : ['Sift Media']),
+        canonicalUrl: blogForm.canonicalUrl?.trim() || `https://siftmedia.com/blog/${generatedSlug}`,
+        ogImage: blogForm.ogImage?.trim() || blogForm.featuredImage?.trim() || 'https://images.unsplash.com/photo-1507238691740-187a5b1d37b8?q=80&w=1200&auto=format&fit=crop',
+        noIndex: blogForm.noIndex ?? false,
+        updatedAt: new Date().toISOString().split('T')[0]
       };
 
-      await setDoc(doc(db, 'blogs', id), blogItem);
-      notify(editingBlogId ? `Blog post "${blogItem.title}" updated with SEO metadata!` : `Blog post "${blogItem.title}" published with custom SEO!`);
+      // Clean up undefined fields and remove any unknown fields before saving to Firestore
+      const cleanBlogItem = Object.fromEntries(
+        Object.entries(blogItem).filter(([key, value]) => {
+          // Remove undefined values and any fields that aren't part of the Blog interface
+          if (value === undefined) return false;
+          // Explicitly filter out any unexpected fields like 'serverid'
+          if (key === 'serverid') return false;
+          return true;
+        })
+      ) as Blog;
 
-      // Reset
-      setEditingBlogId(null);
-      setBlogForm({
-        title: '',
-        slug: '',
-        category: 'UI/UX Design',
-        excerpt: '',
-        content: '',
-        contentBlocks: [],
-        featuredImage: 'https://images.unsplash.com/photo-1507238691740-187a5b1d37b8?q=80&w=800&auto=format&fit=crop',
-        tags: ['Design Systems', 'UX'],
-        readTime: '5 min read',
-        featured: true,
-        status: 'published',
-        tableOfContents: false,
-        seriesId: '',
-        seriesTitle: '',
-        seriesOrder: undefined,
-        seoTitle: '',
-        metaDescription: '',
-        keywords: ['UI UX Design'],
-        canonicalUrl: '',
-        ogImage: '',
-        noIndex: false
-      });
+      console.log('Saving blog item:', cleanBlogItem); // Debug log
+
+      // Save to Firestore with better error handling
+      await setDoc(doc(db, 'blogs', id), cleanBlogItem);
+      notify(editingBlogId ? `Blog post "${blogItem.title}" updated successfully!` : `Blog post "${blogItem.title}" published successfully!`);
+
+      // Reset form state
+      handleCancelBlogEdit();
+      
+      // Refresh data to show updated content
       onRefreshData();
-    } catch (err) {
+    } catch (err: any) {
       console.error('Error saving blog post:', err);
-      notify('Blog post saved successfully.');
-      onRefreshData();
+      notify(`Error: ${err.message || 'Failed to save blog post. Please try again.'}`);
     } finally {
       setLoading(false);
     }
@@ -396,30 +403,38 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
   const handleEditBlog = (post: Blog) => {
     setEditingBlogId(post.id);
     setBlogForm({
-      title: post.title,
-      slug: post.slug,
-      category: post.category,
-      excerpt: post.excerpt,
-      content: post.content,
+      title: post.title || '',
+      slug: post.slug || '',
+      category: post.category || 'UI/UX Design',
+      excerpt: post.excerpt || '',
+      content: post.content || '',
       contentBlocks: post.contentBlocks || [],
-      featuredImage: post.featuredImage,
-      tags: post.tags,
-      publishedAt: post.publishedAt,
-      readTime: post.readTime,
-      featured: post.featured,
+      featuredImage: post.featuredImage || '',
+      tags: post.tags || [],
+      publishedAt: post.publishedAt || '',
+      readTime: post.readTime || '',
+      featured: post.featured ?? true,
       status: post.status || 'published',
       tableOfContents: post.tableOfContents ?? false,
       seriesId: post.seriesId || '',
       seriesTitle: post.seriesTitle || '',
-      seriesOrder: post.seriesOrder,
-      views: post.views,
-      seoTitle: post.seoTitle || post.title,
-      metaDescription: post.metaDescription || post.excerpt,
+      seriesOrder: post.seriesOrder || undefined,
+      views: post.views || 0,
+      seoTitle: post.seoTitle || post.title || '',
+      metaDescription: post.metaDescription || post.excerpt || '',
       keywords: post.keywords || [],
       canonicalUrl: post.canonicalUrl || `https://siftmedia.com/blog/${post.slug}`,
-      ogImage: post.ogImage || post.featuredImage,
+      ogImage: post.ogImage || post.featuredImage || '',
       noIndex: post.noIndex || false
     });
+    
+    // Scroll to form for better UX
+    setTimeout(() => {
+      const form = document.querySelector('form[onsubmit]') as HTMLElement;
+      if (form) {
+        form.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    }, 100);
   };
 
   const handleCancelBlogEdit = () => {
@@ -442,11 +457,14 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
       seriesOrder: undefined,
       seoTitle: '',
       metaDescription: '',
-      keywords: ['UI UX Design'],
+      keywords: ['UI UX Design', 'Sift Media'],
       canonicalUrl: '',
       ogImage: '',
       noIndex: false
     });
+    
+    // Clear any lingering form validation messages
+    notify('Blog form reset successfully.');
   };
 
   // Save Project
@@ -467,9 +485,15 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
         featured: true
       };
 
+      // Only persist optional URLs when provided (Firestore rejects undefined values)
+      const githubUrl = newProject.githubUrl?.trim();
+      const liveUrl = newProject.liveUrl?.trim();
+      if (githubUrl) item.githubUrl = githubUrl;
+      if (liveUrl) item.liveUrl = liveUrl;
+
       await setDoc(doc(db, 'projects', id), item);
       notify(`Project "${item.title}" created successfully!`);
-      setNewProject({ title: '', shortDescription: '', category: 'SaaS Platform', thumbnail: '', technologies: ['React'] });
+      setNewProject({ title: '', shortDescription: '', category: 'SaaS Platform', thumbnail: '', technologies: ['React'], githubUrl: '', liveUrl: '' });
       onRefreshData();
     } catch (err) {
       console.error('Error adding project:', err);
@@ -582,17 +606,21 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
     setTestimonialForm(t);
   };
 
-  // Delete Item
-  const handleDeleteItem = async (col: string, id: string) => {
-    if (!window.confirm('Delete this item from portfolio?')) return;
+  // Delete Item with better confirmation and feedback
+  const handleDeleteItem = async (col: string, id: string, itemTitle?: string) => {
+    const itemName = itemTitle || 'this item';
+    if (!window.confirm(`Are you sure you want to delete "${itemName}"? This action cannot be undone.`)) return;
+    
+    setLoading(true);
     try {
       await deleteDoc(doc(db, col, id));
-      notify(`Item deleted from ${col}.`);
+      notify(`"${itemName}" has been deleted successfully.`);
       onRefreshData();
-    } catch (err) {
+    } catch (err: any) {
       console.error('Delete error:', err);
-      notify('Item deleted.');
-      onRefreshData();
+      notify(`Error deleting "${itemName}": ${err.message || 'Please try again.'}`);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -1084,7 +1112,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                       <tbody className="divide-y divide-white/5">
                         {messages.slice(0, 5).map((m) => (
                           <tr key={m.id} className="hover:bg-white/5 transition-colors">
-                            <td className="py-3 font-bold text-white">{m.name}</td>
+                            <td className="py-3 font-bold text-white">{m.fullName}</td>
                             <td className="py-3 text-neutral-400 font-mono text-[11px]">{m.email}</td>
                             <td className="py-3 text-neutral-300 max-w-xs truncate">{m.message}</td>
                             <td className="py-3 text-right">
@@ -1138,13 +1166,91 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                   onChange={(e) => setNewProject({ ...newProject, shortDescription: e.target.value })}
                   className="w-full bg-[#121212] border border-white/10 rounded-xl px-3.5 py-2.5 text-xs text-white placeholder-neutral-500 focus:outline-none focus:border-[#CCFF00]"
                 />
-                <input
-                  type="text"
-                  placeholder="Thumbnail Image URL"
-                  value={newProject.thumbnail}
-                  onChange={(e) => setNewProject({ ...newProject, thumbnail: e.target.value })}
-                  className="w-full bg-[#121212] border border-white/10 rounded-xl px-3.5 py-2.5 text-xs text-white placeholder-neutral-500 focus:outline-none focus:border-[#CCFF00]"
-                />
+                {/* Repository & Live Demo Links */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div>
+                    <label className="text-[10px] font-bold uppercase tracking-wider text-neutral-400 flex items-center gap-1.5 mb-1">
+                      <Github className="w-3.5 h-3.5 text-[#CCFF00]" />
+                      GitHub Repository URL
+                    </label>
+                    <input
+                      type="url"
+                      placeholder="https://github.com/username/repo"
+                      value={newProject.githubUrl || ''}
+                      onChange={(e) => setNewProject({ ...newProject, githubUrl: e.target.value })}
+                      className="w-full bg-[#121212] border border-white/10 rounded-xl px-3.5 py-2.5 text-xs text-white placeholder-neutral-500 focus:outline-none focus:border-[#CCFF00]"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-[10px] font-bold uppercase tracking-wider text-neutral-400 flex items-center gap-1.5 mb-1">
+                      <Globe className="w-3.5 h-3.5 text-[#CCFF00]" />
+                      Live Demo URL
+                    </label>
+                    <input
+                      type="url"
+                      placeholder="https://your-live-site.com"
+                      value={newProject.liveUrl || ''}
+                      onChange={(e) => setNewProject({ ...newProject, liveUrl: e.target.value })}
+                      className="w-full bg-[#121212] border border-white/10 rounded-xl px-3.5 py-2.5 text-xs text-white placeholder-neutral-500 focus:outline-none focus:border-[#CCFF00]"
+                    />
+                  </div>
+                </div>
+
+                {/* Thumbnail: paste a URL or upload a physical image from device */}
+                <div>
+                  <label className="text-[10px] font-bold uppercase tracking-wider text-neutral-400 flex items-center gap-1.5 mb-1">
+                    <Image className="w-3.5 h-3.5 text-[#CCFF00]" />
+                    Project Thumbnail
+                  </label>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <input
+                      type="text"
+                      placeholder="Thumbnail Image URL"
+                      value={newProject.thumbnail || ''}
+                      onChange={(e) => setNewProject({ ...newProject, thumbnail: e.target.value })}
+                      className="w-full bg-[#121212] border border-white/10 rounded-xl px-3.5 py-2.5 text-xs text-white placeholder-neutral-500 focus:outline-none focus:border-[#CCFF00]"
+                    />
+                    <label className={`flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl border border-dashed border-[#CCFF00]/40 bg-[#CCFF00]/5 hover:bg-[#CCFF00]/10 text-xs text-white transition-colors ${uploadingThumbnail ? 'opacity-60 cursor-wait' : 'cursor-pointer'}`}>
+                      <UploadCloud className="w-4 h-4 text-[#CCFF00]" />
+                      <span>{uploadingThumbnail ? 'Uploading...' : 'Upload Image from Device'}</span>
+                      <input
+                        type="file"
+                        accept="image/*"
+                        className="hidden"
+                        disabled={uploadingThumbnail}
+                        onChange={async (e) => {
+                          const file = e.target.files?.[0];
+                          if (!file) return;
+                          setUploadingThumbnail(true);
+                          try {
+                            notify('Uploading project image...');
+                            const url = await uploadFileToStorage(file, 'project_thumbnails');
+                            setNewProject((prev) => ({ ...prev, thumbnail: url }));
+                            notify('Project image uploaded successfully!');
+                          } catch (error) {
+                            // Fallback to inline data URL if Firebase Storage upload fails
+                            const dataUrl = await fileToDataURL(file);
+                            setNewProject((prev) => ({ ...prev, thumbnail: dataUrl }));
+                            notify('Image loaded (local preview)');
+                          } finally {
+                            setUploadingThumbnail(false);
+                            e.target.value = '';
+                          }
+                        }}
+                      />
+                    </label>
+                  </div>
+                  {newProject.thumbnail && (
+                    <div className="mt-3 flex items-center gap-3">
+                      <img
+                        src={newProject.thumbnail}
+                        alt="Thumbnail preview"
+                        className="w-20 h-20 rounded-xl object-cover border border-white/10 bg-neutral-900 shrink-0"
+                      />
+                      <span className="text-[10px] text-neutral-500 font-mono">Live thumbnail preview</span>
+                    </div>
+                  )}
+                </div>
                 <button
                   type="submit"
                   disabled={loading}
@@ -1159,16 +1265,46 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                 <h4 className="text-xs font-bold uppercase tracking-wider text-neutral-400">Current Projects</h4>
                 {projects.map((p) => (
                   <div key={p.id} className="bg-[#181818] border border-white/5 rounded-xl p-4 flex items-center justify-between gap-4">
-                    <div className="flex items-center gap-3">
-                      <img src={p.thumbnail} alt={p.title} className="w-12 h-12 rounded-lg object-cover bg-neutral-900 shrink-0" />
-                      <div>
+                    <div className="flex items-center gap-3 min-w-0">
+                      <img src={addCacheBuster(p.thumbnail)} alt={p.title} className="w-12 h-12 rounded-lg object-cover bg-neutral-900 shrink-0" />
+                      <div className="min-w-0">
                         <h5 className="text-xs font-bold uppercase text-white">{p.title}</h5>
                         <p className="text-[11px] text-neutral-400 truncate max-w-md">{p.shortDescription}</p>
+                        <div className="flex items-center gap-2 mt-1">
+                          {p.githubUrl ? (
+                            <a
+                              href={p.githubUrl}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="inline-flex items-center gap-1 text-[10px] font-mono text-[#CCFF00] bg-[#CCFF00]/10 border border-[#CCFF00]/30 px-2 py-0.5 rounded hover:bg-[#CCFF00]/20 transition-colors"
+                            >
+                              <Github className="w-3 h-3" /> Code
+                            </a>
+                          ) : (
+                            <span className="inline-flex items-center gap-1 text-[10px] font-mono text-neutral-600 border border-white/5 px-2 py-0.5 rounded">
+                              <Github className="w-3 h-3" /> No repo
+                            </span>
+                          )}
+                          {p.liveUrl ? (
+                            <a
+                              href={p.liveUrl}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="inline-flex items-center gap-1 text-[10px] font-mono text-[#CCFF00] bg-[#CCFF00]/10 border border-[#CCFF00]/30 px-2 py-0.5 rounded hover:bg-[#CCFF00]/20 transition-colors"
+                            >
+                              <ExternalLink className="w-3 h-3" /> Live
+                            </a>
+                          ) : (
+                            <span className="inline-flex items-center gap-1 text-[10px] font-mono text-neutral-600 border border-white/5 px-2 py-0.5 rounded">
+                              <ExternalLink className="w-3 h-3" /> No demo
+                            </span>
+                          )}
+                        </div>
                       </div>
                     </div>
                     <button
                       onClick={() => handleDeleteItem('projects', p.id)}
-                      className="p-2 rounded-lg bg-red-500/10 text-red-400 hover:bg-red-500/20 border border-red-500/30"
+                      className="p-2 rounded-lg bg-red-500/10 text-red-400 hover:bg-red-500/20 border border-red-500/30 shrink-0"
                       title="Delete"
                     >
                       <Trash2 className="w-4 h-4" />
@@ -1798,7 +1934,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                     {/* Article Title */}
                     <div>
                       <label className="text-[10px] font-bold uppercase tracking-wider text-neutral-400 block mb-1">
-                        Article Title*
+                        Article Title* {!blogForm.title?.trim() && <span className="text-red-400">(Required)</span>}
                       </label>
                       <input
                         type="text"
@@ -1811,11 +1947,15 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                             ...blogForm,
                             title,
                             slug: blogForm.slug || autoSlug,
-                            seoTitle: blogForm.seoTitle || `${title} | Sift Media`
+                            seoTitle: blogForm.seoTitle || (title ? `${title} | Sift Media` : '')
                           });
                         }}
                         required
-                        className="w-full bg-[#121212] border border-white/10 rounded-xl px-3.5 py-2.5 text-xs text-white placeholder-neutral-600 focus:outline-none focus:border-[#CCFF00]"
+                        className={`w-full border rounded-xl px-3.5 py-2.5 text-xs text-white placeholder-neutral-600 focus:outline-none transition-colors ${
+                          !blogForm.title?.trim() 
+                            ? 'bg-red-500/5 border-red-500/30 focus:border-red-400' 
+                            : 'bg-[#121212] border-white/10 focus:border-[#CCFF00]'
+                        }`}
                       />
                     </div>
 
@@ -2354,22 +2494,38 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                 <div className="flex items-center gap-3 pt-2">
                   <button
                     type="submit"
-                    disabled={loading}
-                    className="px-6 py-3 rounded-xl bg-[#CCFF00] text-black font-black text-xs uppercase tracking-wider hover:bg-[#b8e600] flex items-center gap-2 shadow-lg"
+                    disabled={loading || !blogForm.title?.trim()}
+                    className={`px-6 py-3 rounded-xl font-black text-xs uppercase tracking-wider flex items-center gap-2 shadow-lg transition-all ${
+                      loading || !blogForm.title?.trim()
+                        ? 'bg-neutral-700 text-neutral-500 cursor-not-allowed'
+                        : 'bg-[#CCFF00] text-black hover:bg-[#b8e600] hover:scale-105'
+                    }`}
                   >
-                    <Save className="w-4 h-4" />
-                    <span>{editingBlogId ? 'Update Article & SEO Settings' : 'Publish Article & Custom SEO'}</span>
+                    <Save className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
+                    <span>
+                      {loading 
+                        ? 'Saving...' 
+                        : editingBlogId 
+                          ? 'Update Article & SEO Settings' 
+                          : 'Publish Article & Custom SEO'
+                      }
+                    </span>
                   </button>
 
                   {editingBlogId && (
                     <button
                       type="button"
                       onClick={handleCancelBlogEdit}
-                      className="px-5 py-3 rounded-xl bg-neutral-800 text-neutral-300 text-xs font-bold hover:text-white"
+                      disabled={loading}
+                      className="px-5 py-3 rounded-xl bg-neutral-800 text-neutral-300 text-xs font-bold hover:text-white transition-colors disabled:opacity-50"
                     >
                       Cancel
                     </button>
                   )}
+
+                  <div className="text-xs text-neutral-400 ml-auto hidden sm:block">
+                    {editingBlogId ? 'Editing existing article' : 'Creating new article'}
+                  </div>
                 </div>
               </form>
 
@@ -2385,8 +2541,22 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                 </div>
 
                 {blogs.length === 0 ? (
-                  <div className="p-8 rounded-2xl bg-[#181818] border border-white/10 text-center">
-                    <p className="text-xs text-neutral-400">No blog posts found. Click "Seed Defaults" or create your first post above!</p>
+                  <div className="p-8 rounded-2xl bg-[#181818] border border-white/10 text-center space-y-4">
+                    <div className="w-16 h-16 rounded-2xl bg-[#CCFF00]/10 border-2 border-[#CCFF00]/30 text-[#CCFF00] flex items-center justify-center mx-auto">
+                      <FileText className="w-8 h-8" />
+                    </div>
+                    <div>
+                      <p className="text-sm font-bold text-white mb-2">No blog posts found</p>
+                      <p className="text-xs text-neutral-400 mb-4">Create your first blog post using the form above, or seed default content.</p>
+                      <button
+                        onClick={handleSeedDefaults}
+                        disabled={seeding}
+                        className="px-4 py-2 rounded-xl bg-[#CCFF00]/10 border border-[#CCFF00]/30 text-[#CCFF00] text-xs font-bold hover:bg-[#CCFF00] hover:text-black transition-colors flex items-center gap-2 mx-auto"
+                      >
+                        <RefreshCw className={`w-3.5 h-3.5 ${seeding ? 'animate-spin' : ''}`} />
+                        <span>Seed Default Posts</span>
+                      </button>
+                    </div>
                   </div>
                 ) : (
                   <div className="space-y-3">
@@ -2444,8 +2614,13 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                             <span>Edit SEO & Post</span>
                           </button>
                           <button
-                            onClick={() => handleDeleteItem('blogs', b.id)}
-                            className="p-2 rounded-xl bg-red-500/10 text-red-400 hover:bg-red-500/20 border border-red-500/30"
+                            onClick={() => handleDeleteItem('blogs', b.id, b.title)}
+                            disabled={loading}
+                            className={`p-2 rounded-xl border text-xs transition-colors ${
+                              loading
+                                ? 'bg-neutral-800 text-neutral-600 border-neutral-700 cursor-not-allowed'
+                                : 'bg-red-500/10 text-red-400 hover:bg-red-500/20 border-red-500/30'
+                            }`}
                             title="Delete Article"
                           >
                             <Trash2 className="w-4 h-4" />
@@ -2513,7 +2688,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                   <div className="md:col-span-4 flex flex-col items-center justify-center p-4 bg-[#121212] rounded-2xl border border-white/10">
                     <div className="relative w-36 h-48 rounded-t-full border-2 border-[#CCFF00]/40 bg-[#1A1A1A] overflow-hidden shadow-xl flex items-end justify-center mb-3">
                       <img
-                        src={siteSettingsForm.profileImageUrl || '/profile.jpg'}
+                        src={addCacheBuster(siteSettingsForm.profileImageUrl || '/profile.jpg')}
                         alt="Profile Preview"
                         className="w-full h-full object-cover object-top"
                         onError={(e) => {

@@ -109,7 +109,14 @@ function AppContent() {
       // 6. Blogs
       const blogSnap = await getDocs(collection(db, 'blogs'));
       const blogList: Blog[] = [];
-      blogSnap.forEach(d => blogList.push({ id: d.id, ...d.data() } as Blog));
+      blogSnap.forEach(d => {
+        const blogData = d.data();
+        // Filter out undefined fields and invalid properties
+        const cleanBlogData = Object.fromEntries(
+          Object.entries(blogData).filter(([_, value]) => value !== undefined)
+        );
+        blogList.push({ id: d.id, ...cleanBlogData } as Blog);
+      });
       if (blogList.length > 0) {
         setBlogs(blogList);
       }
