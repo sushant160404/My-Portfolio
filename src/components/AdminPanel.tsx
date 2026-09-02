@@ -3516,31 +3516,29 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                                 setUploadingCarouselIdx(idx);
                                 notify('Uploading card image...');
                                 try {
-                                  const url = await uploadFileToStorage(file, 'carousel');
+                                  let url: string;
+                                  try {
+                                    url = await uploadFileToStorage(file, 'carousel');
+                                    notify('Card image uploaded successfully!');
+                                  } catch (uploadErr: any) {
+                                    // Firebase upload failed — fall back to local compressed preview
+                                    console.warn('Firebase upload failed, using local fallback:', uploadErr?.message);
+                                    const compressed = await compressImageToDataURL(file);
+                                    if (!compressed) {
+                                      notify(`Upload failed: ${uploadErr?.message || 'Unknown error. Please try again.'}`);
+                                      return;
+                                    }
+                                    url = compressed;
+                                    notify('Card image ready (local preview — Firebase upload failed)');
+                                  }
                                   setSiteSettingsForm((prev) => {
                                     const current = prev.aboutCarousel ?? arr;
                                     const next = [...current];
                                     next[idx] = { ...next[idx], image: url };
                                     return { ...prev, aboutCarousel: next };
                                   });
-                                  notify('Card image uploaded successfully!');
-                                } catch {
-                                  try {
-                                    const url = await compressImageToDataURL(file);
-                                    if (url) {
-                                      setSiteSettingsForm((prev) => {
-                                        const current = prev.aboutCarousel ?? arr;
-                                        const next = [...current];
-                                        next[idx] = { ...next[idx], image: url };
-                                        return { ...prev, aboutCarousel: next };
-                                      });
-                                      notify('Card image ready (local preview)');
-                                    } else {
-                                      notify('Image upload failed. Please try again.');
-                                    }
-                                  } catch {
-                                    notify('Image upload failed. Please try again.');
-                                  }
+                                } catch (err: any) {
+                                  notify(`Image upload failed: ${err?.message || 'Please try again.'}`);
                                 } finally {
                                   setUploadingCarouselIdx(null);
                                   e.target.value = '';

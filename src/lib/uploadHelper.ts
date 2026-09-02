@@ -24,25 +24,41 @@ export async function uploadFileToStorage(
   file: File,
   folder: string = 'images'
 ): Promise<string> {
-  try {
+  // Reject files larger than 5MB before attempting upload
+  const MAX_BYTES = 5 * 1024 * 1024;
+  if (file.size > MAX_BYTES) {
+    throw new Error('File size exceeds 5 MB limit. Please use a smaller image.');
+  }
+
+  // Abort the upload if it hasn't completed within 30 seconds
+  const TIMEOUT_MS = 30_000;
+  const timeoutPromise = new Promise<never>((_, reject) =>
+    setTimeout(() => reject(new Error('Upload timed out. Check your internet connection and try again.')), TIMEOUT_MS)
+  );
+
+  const uploadPromise = (async () => {
     // Create a unique filename with timestamp
     const timestamp = Date.now();
     const sanitizedName = file.name.replace(/[^a-zA-Z0-9.-]/g, '_');
     const fileName = `${folder}/${timestamp}_${sanitizedName}`;
-    
+
     // Create a storage reference
     const storageRef = ref(storage, fileName);
-    
+
     // Upload the file
     await uploadBytes(storageRef, file);
-    
+
     // Get the download URL
     const downloadURL = await getDownloadURL(storageRef);
-    
+
     return downloadURL;
+  })();
+
+  try {
+    return await Promise.race([uploadPromise, timeoutPromise]);
   } catch (error) {
     console.error('Error uploading file to Firebase Storage:', error);
-    throw new Error('Failed to upload file. Falling back to local preview.');
+    throw error instanceof Error ? error : new Error('Failed to upload file. Falling back to local preview.');
   }
 }
 
