@@ -138,6 +138,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
     featured: true
   });
   const [uploadingThumbnail, setUploadingThumbnail] = useState(false);
+  const [uploadingCarouselIdx, setUploadingCarouselIdx] = useState<number | null>(null);
   const [editingProjectId, setEditingProjectId] = useState<string | null>(null);
 
   // Services state
@@ -3499,30 +3500,51 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                           {card.image && (
                             <img src={card.image} alt="preview" className="w-14 h-14 rounded-lg object-cover border border-white/10 shrink-0" />
                           )}
-                          <label className="flex-1 flex items-center gap-2 px-3 py-2 bg-[#1a1a1a] border border-white/10 rounded-lg cursor-pointer hover:border-[#CCFF00]/40 transition-colors">
+                          <label className={`flex-1 flex items-center gap-2 px-3 py-2 bg-[#1a1a1a] border border-white/10 rounded-lg transition-colors ${uploadingCarouselIdx === idx ? 'opacity-60 cursor-wait' : 'cursor-pointer hover:border-[#CCFF00]/40'}`}>
                             <Upload className="w-3.5 h-3.5 text-neutral-400 shrink-0" />
                             <span className="text-[11px] text-neutral-400 truncate">
-                              {card.image ? 'Change image' : 'Upload image'}
+                              {uploadingCarouselIdx === idx ? 'Uploading...' : card.image ? 'Change image' : 'Upload image'}
                             </span>
                             <input
                               type="file"
                               accept="image/*"
                               className="hidden"
+                              disabled={uploadingCarouselIdx !== null}
                               onChange={async (e) => {
                                 const file = e.target.files?.[0];
                                 if (!file) return;
+                                setUploadingCarouselIdx(idx);
+                                notify('Uploading card image...');
                                 try {
                                   const url = await uploadFileToStorage(file, 'carousel');
-                                  const next = [...(siteSettingsForm.aboutCarousel ?? arr)];
-                                  next[idx] = { ...next[idx], image: url };
-                                  setSiteSettingsForm({ ...siteSettingsForm, aboutCarousel: next });
+                                  setSiteSettingsForm((prev) => {
+                                    const current = prev.aboutCarousel ?? arr;
+                                    const next = [...current];
+                                    next[idx] = { ...next[idx], image: url };
+                                    return { ...prev, aboutCarousel: next };
+                                  });
+                                  notify('Card image uploaded successfully!');
                                 } catch {
-                                  const url = await compressImageToDataURL(file);
-                                  const next = [...(siteSettingsForm.aboutCarousel ?? arr)];
-                                  next[idx] = { ...next[idx], image: url };
-                                  setSiteSettingsForm({ ...siteSettingsForm, aboutCarousel: next });
+                                  try {
+                                    const url = await compressImageToDataURL(file);
+                                    if (url) {
+                                      setSiteSettingsForm((prev) => {
+                                        const current = prev.aboutCarousel ?? arr;
+                                        const next = [...current];
+                                        next[idx] = { ...next[idx], image: url };
+                                        return { ...prev, aboutCarousel: next };
+                                      });
+                                      notify('Card image ready (local preview)');
+                                    } else {
+                                      notify('Image upload failed. Please try again.');
+                                    }
+                                  } catch {
+                                    notify('Image upload failed. Please try again.');
+                                  }
+                                } finally {
+                                  setUploadingCarouselIdx(null);
+                                  e.target.value = '';
                                 }
-                                e.target.value = '';
                               }}
                             />
                           </label>
