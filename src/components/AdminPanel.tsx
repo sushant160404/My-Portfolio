@@ -44,6 +44,15 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
   settings,
   onRefreshData
 }) => {
+  // Default cards for About Carousel when no custom cards are set
+  const DEFAULT_ABOUT_CAROUSEL_CARDS = [
+    { id: 'ac1', tag: '1 • PROJECTS', label: 'LIVE SESSION', title: 'End-to-end products, built with precision.', accent: 'from-[#0f1a0f] to-neutral-900' },
+    { id: 'ac2', tag: '2 • UI/UX DESIGN', label: 'FEATURED', title: 'Interfaces that feel intuitive, look stunning.', accent: 'from-[#0a0f1a] to-neutral-900' },
+    { id: 'ac3', tag: '3 • WEB DEVELOPMENT', label: 'IN PROGRESS', title: 'Fast, scalable, and production-ready web apps.', accent: 'from-[#1a0f0a] to-neutral-900' },
+    { id: 'ac4', tag: '4 • BRANDING', label: 'COMPLETED', title: 'Identity systems that leave a lasting impression.', accent: 'from-neutral-900 to-[#111]' },
+    { id: 'ac5', tag: '5 • CONSULTING', label: 'AVAILABLE', title: 'Strategy and direction for your digital growth.', accent: 'from-[#0f0f1a] to-neutral-900' },
+  ];
+
   const navigate = useNavigate();
   const { tab } = useParams<{ tab?: string }>();
   // Active tab is derived from the URL (/admin/:tab) so sections are deep-linkable
@@ -3437,7 +3446,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                         <button
                           type="button"
                           onClick={() => {
-                            const next = (siteSettingsForm.aboutCarousel ?? arr).filter(c => c.id !== card.id);
+                            const next = (siteSettingsForm.aboutCarousel ?? DEFAULT_ABOUT_CAROUSEL_CARDS).filter(c => c.id !== card.id);
                             setSiteSettingsForm({ ...siteSettingsForm, aboutCarousel: next });
                           }}
                           className="text-red-400 hover:text-red-300 transition-colors"
@@ -3450,7 +3459,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                           <label className="text-[10px] text-neutral-500 block mb-1">Tag</label>
                           <input type="text" value={card.tag}
                             onChange={(e) => {
-                              const next = [...(siteSettingsForm.aboutCarousel ?? arr)];
+                              const next = [...(siteSettingsForm.aboutCarousel ?? DEFAULT_ABOUT_CAROUSEL_CARDS)];
                               next[idx] = { ...next[idx], tag: e.target.value };
                               setSiteSettingsForm({ ...siteSettingsForm, aboutCarousel: next });
                             }}
@@ -3461,7 +3470,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                           <label className="text-[10px] text-neutral-500 block mb-1">Label</label>
                           <input type="text" value={card.label}
                             onChange={(e) => {
-                              const next = [...(siteSettingsForm.aboutCarousel ?? arr)];
+                              const next = [...(siteSettingsForm.aboutCarousel ?? DEFAULT_ABOUT_CAROUSEL_CARDS)];
                               next[idx] = { ...next[idx], label: e.target.value };
                               setSiteSettingsForm({ ...siteSettingsForm, aboutCarousel: next });
                             }}
@@ -3473,7 +3482,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                         <label className="text-[10px] text-neutral-500 block mb-1">Title</label>
                         <input type="text" value={card.title}
                           onChange={(e) => {
-                            const next = [...(siteSettingsForm.aboutCarousel ?? arr)];
+                            const next = [...(siteSettingsForm.aboutCarousel ?? DEFAULT_ABOUT_CAROUSEL_CARDS)];
                             next[idx] = { ...next[idx], title: e.target.value };
                             setSiteSettingsForm({ ...siteSettingsForm, aboutCarousel: next });
                           }}
@@ -3484,7 +3493,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                         <label className="text-[10px] text-neutral-500 block mb-1">Gradient (Tailwind classes)</label>
                         <input type="text" value={card.accent}
                           onChange={(e) => {
-                            const next = [...(siteSettingsForm.aboutCarousel ?? arr)];
+                            const next = [...(siteSettingsForm.aboutCarousel ?? DEFAULT_ABOUT_CAROUSEL_CARDS)];
                             next[idx] = { ...next[idx], accent: e.target.value };
                             setSiteSettingsForm({ ...siteSettingsForm, aboutCarousel: next });
                           }}
@@ -3497,9 +3506,25 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                       <div>
                         <label className="text-[10px] text-neutral-500 block mb-1">Card Image</label>
                         <div className="flex items-center gap-3">
-                          {card.image && (
-                            <img src={card.image} alt="preview" className="w-14 h-14 rounded-lg object-cover border border-white/10 shrink-0" />
-                          )}
+                          {uploadingCarouselIdx === idx ? (
+                            <div className="w-14 h-14 rounded-lg border border-white/10 bg-[#1a1a1a] flex items-center justify-center shrink-0">
+                              <div className="w-6 h-6 border-2 border-[#CCFF00] border-t-transparent rounded-full animate-spin"></div>
+                            </div>
+                          ) : card.image ? (
+                            <img 
+                              src={card.image} 
+                              alt="preview" 
+                              className="w-14 h-14 rounded-lg object-cover border border-white/10 shrink-0" 
+                              onError={(e) => {
+                                console.error('Failed to load preview image:', card.image);
+                                // Hide the broken image
+                                e.currentTarget.style.display = 'none';
+                              }}
+                              onLoad={() => {
+                                console.log('Preview image loaded successfully for card', idx);
+                              }}
+                            />
+                          ) : null}
                           <label className={`flex-1 flex items-center gap-2 px-3 py-2 bg-[#1a1a1a] border border-white/10 rounded-lg transition-colors ${uploadingCarouselIdx === idx ? 'opacity-60 cursor-wait' : 'cursor-pointer hover:border-[#CCFF00]/40'}`}>
                             <Upload className="w-3.5 h-3.5 text-neutral-400 shrink-0" />
                             <span className="text-[11px] text-neutral-400 truncate">
@@ -3513,12 +3538,16 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                               onChange={async (e) => {
                                 const file = e.target.files?.[0];
                                 if (!file) return;
+                                
+                                console.log('Starting image upload for carousel card', idx, 'file:', file.name);
                                 setUploadingCarouselIdx(idx);
                                 notify('Uploading card image...');
+                                
                                 try {
                                   let url: string;
                                   try {
                                     url = await uploadFileToStorage(file, 'carousel');
+                                    console.log('Firebase upload successful:', url);
                                     notify('Card image uploaded successfully!');
                                   } catch (uploadErr: any) {
                                     // Firebase upload failed — fall back to local compressed preview
@@ -3529,15 +3558,20 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                                       return;
                                     }
                                     url = compressed;
+                                    console.log('Using compressed fallback URL, length:', url.length);
                                     notify('Card image ready (local preview — Firebase upload failed)');
                                   }
+                                  
+                                  console.log('Setting image URL for card', idx, 'URL length:', url.length);
                                   setSiteSettingsForm((prev) => {
-                                    const current = prev.aboutCarousel ?? arr;
+                                    const current = prev.aboutCarousel ?? DEFAULT_ABOUT_CAROUSEL_CARDS;
                                     const next = [...current];
                                     next[idx] = { ...next[idx], image: url };
+                                    console.log('Updated card:', next[idx]);
                                     return { ...prev, aboutCarousel: next };
                                   });
                                 } catch (err: any) {
+                                  console.error('Image upload error:', err);
                                   notify(`Image upload failed: ${err?.message || 'Please try again.'}`);
                                 } finally {
                                   setUploadingCarouselIdx(null);
@@ -3550,7 +3584,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                             <button
                               type="button"
                               onClick={() => {
-                                const next = [...(siteSettingsForm.aboutCarousel ?? arr)];
+                                const next = [...(siteSettingsForm.aboutCarousel ?? DEFAULT_ABOUT_CAROUSEL_CARDS)];
                                 next[idx] = { ...next[idx], image: undefined };
                                 setSiteSettingsForm({ ...siteSettingsForm, aboutCarousel: next });
                               }}
