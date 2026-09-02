@@ -151,6 +151,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
   const [uploadingThumbnail, setUploadingThumbnail] = useState(false);
   const [uploadingCarouselIdx, setUploadingCarouselIdx] = useState<number | null>(null);
   const [editingProjectId, setEditingProjectId] = useState<string | null>(null);
+  const [techInput, setTechInput] = useState('');
 
   // Services state
   const [editingServiceId, setEditingServiceId] = useState<string | null>(null);
@@ -549,6 +550,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
       await setDoc(doc(db, 'projects', id), item);
       notify(editingProjectId ? `Project "${item.title}" updated successfully!` : `Project "${item.title}" created successfully!`);
       handleCancelProjectEdit();
+      setTechInput('');
       onRefreshData();
     } catch (err) {
       console.error('Error saving project:', err);
@@ -586,6 +588,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
   const handleCancelProjectEdit = () => {
     setEditingProjectId(null);
     setNewProject({ ...emptyProjectForm });
+    setTechInput('');
   };
 
   // Save / Update Service
@@ -1342,6 +1345,56 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                   </div>
                 </div>
 
+                {/* Technologies / Tags */}
+                <div>
+                  <label className="text-[10px] font-bold uppercase tracking-wider text-neutral-400 flex items-center gap-1.5 mb-1">
+                    <Hash className="w-3.5 h-3.5 text-[#CCFF00]" />
+                    Technologies / Tags
+                  </label>
+                  <div className="flex flex-wrap gap-1.5 mb-2">
+                    {(Array.isArray(newProject.technologies) ? newProject.technologies : []).map((tech, i) => (
+                      <span key={i} className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-[#CCFF00]/10 border border-[#CCFF00]/30 text-[#CCFF00] text-[11px] font-mono font-bold">
+                        {tech}
+                        <button
+                          type="button"
+                          onClick={() => setNewProject(p => ({ ...p, technologies: (p.technologies as string[]).filter((_, idx) => idx !== i) }))}
+                          className="ml-0.5 hover:text-white"
+                        ><X className="w-3 h-3" /></button>
+                      </span>
+                    ))}
+                  </div>
+                  <div className="flex gap-2">
+                    <input
+                      type="text"
+                      placeholder="Add tag (e.g. React, Node.js) then press Enter"
+                      value={techInput}
+                      onChange={(e) => setTechInput(e.target.value)}
+                      onKeyDown={(e) => {
+                        if ((e.key === 'Enter' || e.key === ',') && techInput.trim()) {
+                          e.preventDefault();
+                          const val = techInput.trim().replace(/,$/, '');
+                          if (val && !(newProject.technologies as string[])?.includes(val)) {
+                            setNewProject(p => ({ ...p, technologies: [...(Array.isArray(p.technologies) ? p.technologies : []), val] }));
+                          }
+                          setTechInput('');
+                        }
+                      }}
+                      className="flex-1 bg-[#121212] border border-white/10 rounded-xl px-3.5 py-2.5 text-xs text-white placeholder-neutral-500 focus:outline-none focus:border-[#CCFF00]"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const val = techInput.trim();
+                        if (val && !(newProject.technologies as string[])?.includes(val)) {
+                          setNewProject(p => ({ ...p, technologies: [...(Array.isArray(p.technologies) ? p.technologies : []), val] }));
+                        }
+                        setTechInput('');
+                      }}
+                      className="px-3.5 py-2.5 rounded-xl bg-[#CCFF00]/10 border border-[#CCFF00]/30 text-[#CCFF00] text-xs font-bold hover:bg-[#CCFF00]/20"
+                    ><Plus className="w-4 h-4" /></button>
+                  </div>
+                </div>
+
                 {/* Thumbnail: paste a URL or upload a physical image from device */}
                 <div>
                   <label className="text-[10px] font-bold uppercase tracking-wider text-neutral-400 flex items-center gap-1.5 mb-1">
@@ -1411,6 +1464,35 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                     </div>
                   )}
                 </div>
+
+                {/* Technologies / Tags */}
+                <div>
+                  <label className="text-[10px] font-bold uppercase tracking-wider text-neutral-400 flex items-center gap-1.5 mb-1">
+                    <Hash className="w-3.5 h-3.5 text-[#CCFF00]" />
+                    Technologies / Tags
+                    <span className="text-neutral-600 normal-case font-normal">(comma-separated)</span>
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="React, Node.js, PostgreSQL, Tailwind CSS"
+                    value={Array.isArray(newProject.technologies) ? newProject.technologies.join(', ') : (newProject.technologies || '')}
+                    onChange={(e) => setNewProject({ ...newProject, technologies: e.target.value as any })}
+                    className="w-full bg-[#121212] border border-white/10 rounded-xl px-3.5 py-2.5 text-xs text-white placeholder-neutral-500 focus:outline-none focus:border-[#CCFF00]"
+                  />
+                  {/* Live tag preview */}
+                  {newProject.technologies && (Array.isArray(newProject.technologies) ? newProject.technologies : (newProject.technologies as unknown as string).split(',').map((s: string) => s.trim())).filter(Boolean).length > 0 && (
+                    <div className="flex flex-wrap gap-1.5 mt-2">
+                      {(Array.isArray(newProject.technologies) ? newProject.technologies : (newProject.technologies as unknown as string).split(',').map((s: string) => s.trim()))
+                        .filter(Boolean)
+                        .map((tech, i) => (
+                          <span key={i} className="text-[10px] px-2 py-0.5 rounded-full bg-[#CCFF00]/10 border border-[#CCFF00]/30 text-[#CCFF00] font-mono">
+                            {tech}
+                          </span>
+                        ))}
+                    </div>
+                  )}
+                </div>
+
                 <button
                   type="submit"
                   disabled={loading}
