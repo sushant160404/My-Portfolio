@@ -52,7 +52,6 @@ function AppContent() {
   const [testimonials, setTestimonials] = useState<Testimonial[]>(INITIAL_TESTIMONIALS);
   const [blogs, setBlogs] = useState<Blog[]>(INITIAL_BLOGS);
   const [tags, setTags] = useState<Tag[]>([]);
-  const [tags, setTags] = useState<Tag[]>([]);
 
   // Modals state
   const [videoModalOpen, setVideoModalOpen] = useState(false);
