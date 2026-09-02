@@ -21,7 +21,7 @@ import { AdminPanel } from './components/AdminPanel';
 import { ChatBot } from './components/ChatBot';
 import { NotFoundPage } from './components/NotFoundPage';
 
-import { Project, Service, Skill, Testimonial, Blog, SiteSettings } from './types';
+import { Project, Service, Skill, Testimonial, Blog, SiteSettings, Tag } from './types';
 import {
   INITIAL_SETTINGS,
   INITIAL_SERVICES,
@@ -51,6 +51,8 @@ function AppContent() {
   const [skills, setSkills] = useState<Skill[]>(INITIAL_SKILLS);
   const [testimonials, setTestimonials] = useState<Testimonial[]>(INITIAL_TESTIMONIALS);
   const [blogs, setBlogs] = useState<Blog[]>(INITIAL_BLOGS);
+  const [tags, setTags] = useState<Tag[]>([]);
+  const [tags, setTags] = useState<Tag[]>([]);
 
   // Modals state
   const [videoModalOpen, setVideoModalOpen] = useState(false);
@@ -120,6 +122,12 @@ function AppContent() {
       if (blogList.length > 0) {
         setBlogs(blogList);
       }
+
+      // 7. Tags
+      const tagSnap = await getDocs(collection(db, 'tags'));
+      const tagList: Tag[] = [];
+      tagSnap.forEach(d => tagList.push({ id: d.id, ...d.data() } as Tag));
+      setTags(tagList.sort((a, b) => (a.order || 0) - (b.order || 0)));
 
     } catch (err) {
       console.warn('Firestore load warning, using initial preset:', err);
@@ -195,6 +203,7 @@ function AppContent() {
       skills={skills}
       testimonials={testimonials}
       blogs={blogs}
+      tags={tags}
       settings={settings}
       onRefreshData={loadPortfolioData}
     />

@@ -7,10 +7,10 @@ import {
   Download, FileUp, Eye, EyeOff, Link, UploadCloud, Lock, Unlock,
   Key, ShieldCheck, LogOut, AlertTriangle, UserCheck, ShieldAlert,
   Search, Globe, Github, Share2, ExternalLink, FileCode, Bot, Zap, Cpu, MessageSquare,
-  LayoutDashboard, ArrowLeft, BarChart2, Activity, ArrowRight
+  LayoutDashboard, ArrowLeft, BarChart2, Activity, ArrowRight, Hash
 } from 'lucide-react';
 import {
-  Project, Service, Skill, Testimonial, Blog, ContactMessage, SiteSettings, ThemeConfig, AboutCarouselCard
+  Project, Service, Skill, Testimonial, Blog, ContactMessage, SiteSettings, ThemeConfig, AboutCarouselCard, Tag
 } from '../types';
 import { INITIAL_PROJECTS, INITIAL_SERVICES, INITIAL_SKILLS, INITIAL_TESTIMONIALS, INITIAL_BLOGS, INITIAL_SETTINGS } from '../lib/initialData';
 import { db } from '../lib/firebase';
@@ -18,7 +18,7 @@ import { collection, doc, setDoc, deleteDoc, getDocs } from 'firebase/firestore'
 import { uploadFileToStorage, fileToDataURL, compressImageToDataURL, addCacheBuster } from '../lib/uploadHelper';
 
 // Admin sections that map to URL routes: /admin/<tab> (e.g. /admin/projects)
-const ADMIN_TABS = ['dashboard', 'projects', 'services', 'skills', 'testimonials', 'blogs', 'messages', 'media', 'theme', 'settings', 'chatbot'] as const;
+const ADMIN_TABS = ['dashboard', 'projects', 'services', 'skills', 'testimonials', 'blogs', 'tags', 'messages', 'media', 'theme', 'settings', 'chatbot'] as const;
 type AdminTab = typeof ADMIN_TABS[number];
 
 interface AdminPanelProps {
@@ -29,6 +29,7 @@ interface AdminPanelProps {
   skills: Skill[];
   testimonials: Testimonial[];
   blogs?: Blog[];
+  tags?: Tag[];
   settings: SiteSettings;
   onRefreshData: () => void;
 }
@@ -41,6 +42,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
   skills,
   testimonials,
   blogs = [],
+  tags = [],
   settings,
   onRefreshData
 }) => {
@@ -177,6 +179,16 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
     company: '',
     quote: '',
     avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=800&auto=format&fit=crop',
+    order: 1
+  });
+
+  // Tags state
+  const [editingTagId, setEditingTagId] = useState<string | null>(null);
+  const [tagForm, setTagForm] = useState<Partial<Tag>>({
+    name: '',
+    description: '',
+    color: '#CCFF00',
+    category: 'blog',
     order: 1
   });
 
@@ -678,6 +690,61 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
     setTestimonialForm(t);
   };
 
+  // Save / Update Tag
+  const handleSaveTag = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!tagForm.name) return;
+    setLoading(true);
+    try {
+      const id = editingTagId || `tag_${Date.now()}`;
+      const slug = (tagForm.name || '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
+      
+      // Calculate usage count
+      let usageCount = 0;
+      if (tagForm.category === 'blog' || tagForm.category === 'general') {
+        usageCount = blogs.filter(b => 
+          b.tags && b.tags.some(t => 
+            t.toLowerCase() === (tagForm.name || '').toLowerCase()
+          )
+        ).length;
+      }
+      
+      const item: Tag = {
+        id,
+        name: tagForm.name,
+        slug,
+        description: tagForm.description || '',
+        color: tagForm.color || '#CCFF00',
+        category: tagForm.category || 'blog',
+        usageCount,
+        createdAt: new Date().toISOString(),
+        order: Number(tagForm.order) || 1
+      };
+      
+      await setDoc(doc(db, 'tags', id), item);
+      notify(editingTagId ? `Tag "${item.name}" updated!` : `Tag "${item.name}" created!`);
+      setEditingTagId(null);
+      setTagForm({ name: '', description: '', color: '#CCFF00', category: 'blog', order: 1 });
+      onRefreshData();
+    } catch (err) {
+      console.error('Error saving tag:', err);
+      notify('Tag saved.');
+      onRefreshData();
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleEditTag = (tag: Tag) => {
+    setEditingTagId(tag.id);
+    setTagForm(tag);
+  };
+
+  const handleCancelTagEdit = () => {
+    setEditingTagId(null);
+    setTagForm({ name: '', description: '', color: '#CCFF00', category: 'blog', order: 1 });
+  };
+
   // Delete Item with better confirmation and feedback
   const handleDeleteItem = async (col: string, id: string, itemTitle?: string) => {
     const itemName = itemTitle || 'this item';
@@ -886,6 +953,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
               { id: 'skills', label: 'Skills', icon: Award, count: skills.length },
               { id: 'testimonials', label: 'Testimonials', icon: Star, count: testimonials.length },
               { id: 'blogs', label: 'Blog & SEO', icon: FileText, count: blogs.length },
+              { id: 'tags', label: 'Tag Management', icon: Hash, count: tags.length },
               { id: 'messages', label: 'Inbox Messages', icon: Mail, count: messages.length },
               { id: 'media', label: 'Media Library', icon: Image, count: null },
               { id: 'theme', label: 'Theme Customizer', icon: Palette, count: null },
@@ -1982,6 +2050,273 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                   </div>
                 )}
               </div>
+            </div>
+          )}
+
+          {/* TAGS MANAGEMENT TAB */}
+          {activeTab === 'tags' && (
+            <div className="space-y-8 animate-fadeIn">
+              <div className="flex items-center justify-between pb-4 border-b border-white/10">
+                <div>
+                  <h4 className="text-sm font-black uppercase tracking-tight text-white flex items-center gap-2">
+                    <Hash className="w-4 h-4 text-[#CCFF00]" />
+                    <span>Content Tags & Categories CMS</span>
+                  </h4>
+                  <p className="text-xs text-neutral-400">Create and manage reusable tags for blogs, projects, and other content. Organize content with consistent taxonomy.</p>
+                </div>
+                <span className="px-3 py-1 rounded-full bg-[#CCFF00]/10 border border-[#CCFF00]/30 text-[#CCFF00] text-[10px] font-mono font-bold">
+                  {tags.length} TAGS ACTIVE
+                </span>
+              </div>
+
+              {/* Form to Add / Edit Tag */}
+              <form onSubmit={handleSaveTag} className="bg-[#181818] border border-white/10 rounded-2xl p-6 space-y-4">
+                <div className="flex items-center justify-between border-b border-white/5 pb-3">
+                  <h5 className="text-xs font-bold uppercase tracking-wider text-[#CCFF00] flex items-center gap-2">
+                    {editingTagId ? <Edit3 className="w-4 h-4" /> : <Plus className="w-4 h-4" />}
+                    <span>{editingTagId ? 'Edit Content Tag' : 'Create New Content Tag'}</span>
+                  </h5>
+                  {editingTagId && (
+                    <button
+                      type="button"
+                      onClick={handleCancelTagEdit}
+                      className="text-xs text-neutral-400 hover:text-white underline font-mono"
+                    >
+                      Cancel Edit
+                    </button>
+                  )}
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                  {/* Tag Name */}
+                  <div className="sm:col-span-2">
+                    <label className="text-[10px] font-bold uppercase tracking-wider text-neutral-400 block mb-1">
+                      Tag Name*
+                    </label>
+                    <input
+                      type="text"
+                      placeholder="e.g. React, UI Design, Frontend"
+                      value={tagForm.name || ''}
+                      onChange={(e) => setTagForm({ ...tagForm, name: e.target.value })}
+                      required
+                      className="w-full bg-[#121212] border border-white/10 rounded-xl px-3.5 py-2.5 text-xs text-white placeholder-neutral-600 focus:outline-none focus:border-[#CCFF00]"
+                    />
+                  </div>
+
+                  {/* Category */}
+                  <div>
+                    <label className="text-[10px] font-bold uppercase tracking-wider text-neutral-400 block mb-1">
+                      Category
+                    </label>
+                    <select
+                      value={tagForm.category || 'blog'}
+                      onChange={(e) => setTagForm({ ...tagForm, category: e.target.value as Tag['category'] })}
+                      className="w-full bg-[#121212] border border-white/10 rounded-xl px-3.5 py-2.5 text-xs text-white focus:outline-none focus:border-[#CCFF00]"
+                    >
+                      <option value="blog">Blog Tags</option>
+                      <option value="project">Project Tags</option>
+                      <option value="general">General Tags</option>
+                    </select>
+                  </div>
+
+                  {/* Color */}
+                  <div>
+                    <label className="text-[10px] font-bold uppercase tracking-wider text-neutral-400 block mb-1">
+                      Tag Color
+                    </label>
+                    <input
+                      type="color"
+                      value={tagForm.color || '#CCFF00'}
+                      onChange={(e) => setTagForm({ ...tagForm, color: e.target.value })}
+                      className="w-full bg-[#121212] border border-white/10 rounded-xl px-2 py-2 h-10 focus:outline-none focus:border-[#CCFF00]"
+                    />
+                  </div>
+                </div>
+
+                {/* Description */}
+                <div>
+                  <label className="text-[10px] font-bold uppercase tracking-wider text-neutral-400 block mb-1">
+                    Description (Optional)
+                  </label>
+                  <textarea
+                    rows={2}
+                    placeholder="Brief description of what content this tag represents..."
+                    value={tagForm.description || ''}
+                    onChange={(e) => setTagForm({ ...tagForm, description: e.target.value })}
+                    className="w-full bg-[#121212] border border-white/10 rounded-xl p-3 text-xs text-white placeholder-neutral-600 focus:outline-none focus:border-[#CCFF00]"
+                  />
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 items-end">
+                  {/* Order */}
+                  <div>
+                    <label className="text-[10px] font-bold uppercase tracking-wider text-neutral-400 block mb-1">
+                      Display Order
+                    </label>
+                    <input
+                      type="number"
+                      min="1"
+                      value={tagForm.order || 1}
+                      onChange={(e) => setTagForm({ ...tagForm, order: parseInt(e.target.value) })}
+                      className="w-full bg-[#121212] border border-white/10 rounded-xl px-3.5 py-2.5 text-xs text-white focus:outline-none focus:border-[#CCFF00]"
+                    />
+                  </div>
+
+                  {/* Submit Button */}
+                  <button
+                    type="submit"
+                    disabled={loading}
+                    className="px-5 py-2.5 rounded-xl bg-[#CCFF00] text-black font-black text-xs uppercase tracking-wider hover:bg-[#b8e600] flex items-center gap-2 disabled:opacity-60"
+                  >
+                    <Save className="w-4 h-4" />
+                    <span>{editingTagId ? 'Update Tag' : 'Create Tag'}</span>
+                  </button>
+                </div>
+              </form>
+
+              {/* Tags List */}
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <h4 className="text-xs font-bold uppercase tracking-wider text-neutral-400">Current Tags</h4>
+                  <div className="flex items-center gap-2">
+                    <span className="text-[10px] text-neutral-500 font-mono">Total: {tags.length}</span>
+                  </div>
+                </div>
+
+                {tags.length === 0 ? (
+                  <div className="bg-[#181818] border border-white/10 rounded-2xl p-8 text-center">
+                    <Hash className="w-12 h-12 text-neutral-600 mx-auto mb-3" />
+                    <p className="text-sm text-neutral-400 mb-2">No content tags created yet</p>
+                    <p className="text-xs text-neutral-600">Create your first tag using the form above to organize your content.</p>
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-1 gap-3">
+                    {tags
+                      .sort((a, b) => (a.order || 0) - (b.order || 0))
+                      .map((tag) => {
+                        const usageCount = tag.category === 'blog' || tag.category === 'general' 
+                          ? blogs.filter(b => b.tags && b.tags.some(t => t.toLowerCase() === tag.name.toLowerCase())).length
+                          : 0;
+
+                        return (
+                          <div key={tag.id} className="bg-[#181818] border border-white/5 rounded-xl p-4 flex items-center justify-between gap-4">
+                            <div className="flex items-center gap-3 min-w-0">
+                              <div 
+                                className="w-4 h-4 rounded-full border border-white/20 shrink-0"
+                                style={{ backgroundColor: tag.color }}
+                              />
+                              <div className="min-w-0">
+                                <div className="flex items-center gap-2 mb-1">
+                                  <h5 className="text-xs font-bold text-white">{tag.name}</h5>
+                                  <span 
+                                    className="text-[10px] px-2 py-0.5 rounded-full font-mono font-bold border"
+                                    style={{ 
+                                      backgroundColor: `${tag.color}20`,
+                                      borderColor: `${tag.color}60`,
+                                      color: tag.color 
+                                    }}
+                                  >
+                                    {tag.category.toUpperCase()}
+                                  </span>
+                                </div>
+                                <p className="text-[11px] text-neutral-400 truncate max-w-md">
+                                  {tag.description || 'No description'}
+                                </p>
+                                <div className="flex items-center gap-3 mt-1">
+                                  <span className="text-[10px] text-neutral-500 font-mono">
+                                    Used in {usageCount} content{usageCount !== 1 ? 's' : ''}
+                                  </span>
+                                  <span className="text-[10px] text-neutral-600 font-mono">
+                                    Order: {tag.order || 1}
+                                  </span>
+                                </div>
+                              </div>
+                            </div>
+                            <div className="flex items-center gap-2 shrink-0">
+                              <button
+                                onClick={() => handleEditTag(tag)}
+                                className="px-3.5 py-1.5 rounded-xl bg-neutral-800 text-neutral-300 hover:text-white border border-neutral-700 text-xs font-bold flex items-center gap-1.5 transition-colors"
+                              >
+                                <Edit3 className="w-3.5 h-3.5" />
+                                <span>Edit</span>
+                              </button>
+                              <button
+                                onClick={() => handleDeleteItem('tags', tag.id, tag.name)}
+                                className="p-2 rounded-lg bg-red-500/10 text-red-400 hover:bg-red-500/20 border border-red-500/30"
+                                title={usageCount > 0 ? `Warning: This tag is used in ${usageCount} content(s)` : 'Delete tag'}
+                              >
+                                <Trash2 className="w-4 h-4" />
+                              </button>
+                            </div>
+                          </div>
+                        );
+                      })}
+                  </div>
+                )}
+              </div>
+
+              {/* Tag Usage Analytics */}
+              {tags.length > 0 && (
+                <div className="bg-[#181818] border border-white/10 rounded-2xl p-6 space-y-4">
+                  <h4 className="text-xs font-bold uppercase tracking-wider text-[#CCFF00] flex items-center gap-2">
+                    <BarChart2 className="w-4 h-4" />
+                    <span>Tag Usage Analytics</span>
+                  </h4>
+                  
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-center">
+                    <div className="bg-[#121212] border border-white/5 rounded-xl p-4">
+                      <div className="text-2xl font-black text-[#CCFF00] mb-1">{tags.filter(t => t.category === 'blog').length}</div>
+                      <div className="text-[10px] font-bold uppercase text-neutral-400">Blog Tags</div>
+                    </div>
+                    <div className="bg-[#121212] border border-white/5 rounded-xl p-4">
+                      <div className="text-2xl font-black text-[#CCFF00] mb-1">{tags.filter(t => t.category === 'project').length}</div>
+                      <div className="text-[10px] font-bold uppercase text-neutral-400">Project Tags</div>
+                    </div>
+                    <div className="bg-[#121212] border border-white/5 rounded-xl p-4">
+                      <div className="text-2xl font-black text-[#CCFF00] mb-1">
+                        {tags.reduce((total, t) => {
+                          if (t.category === 'blog' || t.category === 'general') {
+                            return total + blogs.filter(b => b.tags && b.tags.some(bt => bt.toLowerCase() === t.name.toLowerCase())).length;
+                          }
+                          return total;
+                        }, 0)}
+                      </div>
+                      <div className="text-[10px] font-bold uppercase text-neutral-400">Total Usages</div>
+                    </div>
+                  </div>
+
+                  {/* Most Used Tags */}
+                  <div>
+                    <h5 className="text-[10px] font-bold uppercase tracking-wider text-neutral-400 mb-3">Most Used Tags</h5>
+                    <div className="space-y-2">
+                      {tags
+                        .map(tag => ({
+                          ...tag,
+                          actualUsage: tag.category === 'blog' || tag.category === 'general' 
+                            ? blogs.filter(b => b.tags && b.tags.some(t => t.toLowerCase() === tag.name.toLowerCase())).length
+                            : 0
+                        }))
+                        .sort((a, b) => b.actualUsage - a.actualUsage)
+                        .slice(0, 5)
+                        .map(tag => (
+                          <div key={tag.id} className="flex items-center justify-between p-2.5 rounded-xl bg-[#121212] border border-white/5">
+                            <div className="flex items-center gap-2">
+                              <div 
+                                className="w-3 h-3 rounded-full"
+                                style={{ backgroundColor: tag.color }}
+                              />
+                              <span className="text-xs text-white">{tag.name}</span>
+                            </div>
+                            <span className="text-[10px] text-neutral-400 font-mono">
+                              {tag.actualUsage} usage{tag.actualUsage !== 1 ? 's' : ''}
+                            </span>
+                          </div>
+                        ))
+                      }
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
           )}
 

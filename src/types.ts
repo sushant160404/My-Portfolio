@@ -124,6 +124,18 @@ export interface Testimonial {
   order: number;
 }
 
+export interface Tag {
+  id: string;
+  name: string;
+  slug: string;
+  description?: string;
+  color?: string;
+  category: 'blog' | 'project' | 'general';
+  usageCount?: number;
+  createdAt: string;
+  order?: number;
+}
+
 export interface ContactMessage {
   id?: string;
   fullName: string;
