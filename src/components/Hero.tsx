@@ -27,26 +27,53 @@ export const Hero: React.FC<HeroProps> = ({ settings, onOpenVideo }) => {
                 Best Skills On:
               </span>
               
-              <div className="w-9 h-9 rounded-xl bg-neutral-900 border border-neutral-700 flex items-center justify-center p-2 hover:border-[#CCFF00] transition-colors" title="Figma">
-                <svg className="w-5 h-5" viewBox="0 0 38 57" fill="none">
-                  <path d="M19 28.5C19 23.2533 23.2533 19 28.5 19C33.7467 19 38 23.2533 38 28.5C38 33.7467 33.7467 38 28.5 38H19V28.5Z" fill="#1ABCFE"/>
-                  <path d="M0 47.5C0 42.2533 4.25329 38 9.5 38H19V47.5C19 52.7467 14.7467 57 9.5 57C4.25329 57 0 52.7467 0 47.5Z" fill="#0ACF83"/>
-                  <path d="M19 0V19H28.5C33.7467 19 38 14.7467 38 9.5C38 4.25329 33.7467 0 28.5 0H19Z" fill="#FF7262"/>
-                  <path d="M0 9.5C0 14.7467 4.25329 19 9.5 19H19V0H9.5C4.25329 0 0 4.25329 0 9.5Z" fill="#F24E1E"/>
-                  <path d="M0 28.5C0 33.7467 4.25329 38 9.5 38H19V19H9.5C4.25329 19 0 23.2533 0 28.5Z" fill="#A259FF"/>
+              {/* Next.js */}
+              <div className="w-9 h-9 rounded-xl bg-neutral-900 border border-neutral-700 flex items-center justify-center p-1.5 hover:border-[#CCFF00] transition-colors" title="Next.js">
+                <svg className="w-5 h-5" viewBox="0 0 180 180" fill="none">
+                  <mask id="mask0" style={{maskType:'alpha'}} maskUnits="userSpaceOnUse" x="0" y="0" width="180" height="180">
+                    <circle cx="90" cy="90" r="90" fill="black"/>
+                  </mask>
+                  <g mask="url(#mask0)">
+                    <circle cx="90" cy="90" r="90" fill="black"/>
+                    <path d="M149.508 157.52L69.142 54H54V125.97H66.1731V69.3836L139.978 164.84C143.247 162.485 146.392 159.948 149.508 157.52Z" fill="url(#gradient0)"/>
+                    <rect x="115" y="54" width="12" height="72" fill="url(#gradient1)"/>
+                  </g>
+                  <defs>
+                    <linearGradient id="gradient0" x1="109" y1="116.5" x2="144.5" y2="160.5" gradientUnits="userSpaceOnUse">
+                      <stop stopColor="white"/>
+                      <stop offset="1" stopColor="white" stopOpacity="0"/>
+                    </linearGradient>
+                    <linearGradient id="gradient1" x1="121" y1="54" x2="120.799" y2="106.875" gradientUnits="userSpaceOnUse">
+                      <stop stopColor="white"/>
+                      <stop offset="1" stopColor="white" stopOpacity="0"/>
+                    </linearGradient>
+                  </defs>
                 </svg>
               </div>
 
-              <div className="w-9 h-9 rounded-xl bg-neutral-900 border border-neutral-700 flex items-center justify-center p-2 hover:border-[#CCFF00] transition-colors" title="WordPress">
-                <span className="font-bold text-white text-xs">WP</span>
+              {/* Express.js */}
+              <div className="w-9 h-9 rounded-xl bg-neutral-900 border border-neutral-700 flex items-center justify-center p-2 hover:border-[#CCFF00] transition-colors" title="Express.js">
+                <span className="font-bold text-neutral-300 text-[9px] leading-none text-center">EXP</span>
               </div>
 
-              <div className="w-9 h-9 rounded-xl bg-neutral-900 border border-neutral-700 flex items-center justify-center p-2 hover:border-[#CCFF00] transition-colors" title="Photoshop">
-                <span className="font-bold text-blue-400 text-xs">Ps</span>
+              {/* Node.js */}
+              <div className="w-9 h-9 rounded-xl bg-neutral-900 border border-neutral-700 flex items-center justify-center p-1.5 hover:border-[#CCFF00] transition-colors" title="Node.js">
+                <svg className="w-5 h-5" viewBox="0 0 256 289" fill="none">
+                  <path d="M128 0L256 74v141L128 289 0 215V74L128 0z" fill="#539E43"/>
+                  <path d="M128 20.5L19.5 81.5v126L128 268.5l108.5-61V81.5L128 20.5z" fill="#539E43"/>
+                  <path d="M128 144.5c-8.8 0-16-7.2-16-16s7.2-16 16-16 16 7.2 16 16-7.2 16-16 16z" fill="white"/>
+                  <path d="M107 94h21v40h-21zM128 134h21v61h-21z" fill="white"/>
+                </svg>
               </div>
 
-              <div className="w-9 h-9 rounded-xl bg-neutral-900 border border-neutral-700 flex items-center justify-center p-2 hover:border-[#CCFF00] transition-colors" title="Webflow">
-                <span className="font-bold text-[#CCFF00] text-xs">W</span>
+              {/* React Native */}
+              <div className="w-9 h-9 rounded-xl bg-neutral-900 border border-neutral-700 flex items-center justify-center p-1.5 hover:border-[#CCFF00] transition-colors" title="React Native">
+                <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none">
+                  <circle cx="12" cy="12" r="2.5" fill="#61DAFB"/>
+                  <ellipse cx="12" cy="12" rx="10" ry="4" stroke="#61DAFB" strokeWidth="1.2" fill="none"/>
+                  <ellipse cx="12" cy="12" rx="10" ry="4" stroke="#61DAFB" strokeWidth="1.2" fill="none" transform="rotate(60 12 12)"/>
+                  <ellipse cx="12" cy="12" rx="10" ry="4" stroke="#61DAFB" strokeWidth="1.2" fill="none" transform="rotate(120 12 12)"/>
+                </svg>
               </div>
             </div>
 
