@@ -135,6 +135,15 @@ export interface ContactMessage {
   status?: 'unread' | 'read' | 'archived';
 }
 
+export interface AboutCarouselCard {
+  id: string;
+  tag: string;
+  title: string;
+  label: string;
+  accent: string;
+  image?: string;
+}
+
 export interface ThemeConfig {
   accentColor: string;
   accentRgb: string;
@@ -174,6 +183,7 @@ export interface SiteSettings {
   };
   adminPassword?: string;
   theme?: ThemeConfig;
+  aboutCarousel?: AboutCarouselCard[];
   // Groq AI Chatbot settings
   groqApiKey?: string;
   groqModel?: string;

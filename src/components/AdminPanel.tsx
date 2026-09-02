@@ -10,7 +10,7 @@ import {
   LayoutDashboard, ArrowLeft, BarChart2, Activity, ArrowRight
 } from 'lucide-react';
 import {
-  Project, Service, Skill, Testimonial, Blog, ContactMessage, SiteSettings, ThemeConfig
+  Project, Service, Skill, Testimonial, Blog, ContactMessage, SiteSettings, ThemeConfig, AboutCarouselCard
 } from '../types';
 import { INITIAL_PROJECTS, INITIAL_SERVICES, INITIAL_SKILLS, INITIAL_TESTIMONIALS, INITIAL_BLOGS, INITIAL_SETTINGS } from '../lib/initialData';
 import { db } from '../lib/firebase';
@@ -3412,6 +3412,154 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                     </span>
                   </div>
                 </div>
+              </div>
+
+              {/* About Section — Carousel Cards */}
+              <div className="border-t border-white/10 pt-4 space-y-3">
+                <h5 className="text-xs font-bold uppercase tracking-wider text-[#CCFF00] flex items-center gap-2">
+                  <Layers className="w-4 h-4" />
+                  <span>About Section — Carousel Cards</span>
+                </h5>
+                <p className="text-[11px] text-neutral-500">Manage the feature cards shown in the rotating carousel on the About section.</p>
+
+                <div className="space-y-3">
+                  {(siteSettingsForm.aboutCarousel ?? [
+                    { id: 'ac1', tag: '1 • PROJECTS', label: 'LIVE SESSION', title: 'End-to-end products, built with precision.', accent: 'from-[#0f1a0f] to-neutral-900' },
+                    { id: 'ac2', tag: '2 • UI/UX DESIGN', label: 'FEATURED', title: 'Interfaces that feel intuitive, look stunning.', accent: 'from-[#0a0f1a] to-neutral-900' },
+                    { id: 'ac3', tag: '3 • WEB DEVELOPMENT', label: 'IN PROGRESS', title: 'Fast, scalable, and production-ready web apps.', accent: 'from-[#1a0f0a] to-neutral-900' },
+                    { id: 'ac4', tag: '4 • BRANDING', label: 'COMPLETED', title: 'Identity systems that leave a lasting impression.', accent: 'from-neutral-900 to-[#111]' },
+                    { id: 'ac5', tag: '5 • CONSULTING', label: 'AVAILABLE', title: 'Strategy and direction for your digital growth.', accent: 'from-[#0f0f1a] to-neutral-900' },
+                  ]).map((card, idx, arr) => (
+                    <div key={card.id} className="bg-[#121212] border border-white/10 rounded-xl p-4 space-y-3">
+                      <div className="flex items-center justify-between">
+                        <span className="text-[10px] font-bold uppercase tracking-wider text-neutral-400">Card {idx + 1}</span>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            const next = (siteSettingsForm.aboutCarousel ?? arr).filter(c => c.id !== card.id);
+                            setSiteSettingsForm({ ...siteSettingsForm, aboutCarousel: next });
+                          }}
+                          className="text-red-400 hover:text-red-300 transition-colors"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
+                      <div className="grid grid-cols-2 gap-3">
+                        <div>
+                          <label className="text-[10px] text-neutral-500 block mb-1">Tag</label>
+                          <input type="text" value={card.tag}
+                            onChange={(e) => {
+                              const next = [...(siteSettingsForm.aboutCarousel ?? arr)];
+                              next[idx] = { ...next[idx], tag: e.target.value };
+                              setSiteSettingsForm({ ...siteSettingsForm, aboutCarousel: next });
+                            }}
+                            className="w-full bg-[#1a1a1a] border border-white/10 rounded-lg px-3 py-1.5 text-xs text-white"
+                          />
+                        </div>
+                        <div>
+                          <label className="text-[10px] text-neutral-500 block mb-1">Label</label>
+                          <input type="text" value={card.label}
+                            onChange={(e) => {
+                              const next = [...(siteSettingsForm.aboutCarousel ?? arr)];
+                              next[idx] = { ...next[idx], label: e.target.value };
+                              setSiteSettingsForm({ ...siteSettingsForm, aboutCarousel: next });
+                            }}
+                            className="w-full bg-[#1a1a1a] border border-white/10 rounded-lg px-3 py-1.5 text-xs text-white"
+                          />
+                        </div>
+                      </div>
+                      <div>
+                        <label className="text-[10px] text-neutral-500 block mb-1">Title</label>
+                        <input type="text" value={card.title}
+                          onChange={(e) => {
+                            const next = [...(siteSettingsForm.aboutCarousel ?? arr)];
+                            next[idx] = { ...next[idx], title: e.target.value };
+                            setSiteSettingsForm({ ...siteSettingsForm, aboutCarousel: next });
+                          }}
+                          className="w-full bg-[#1a1a1a] border border-white/10 rounded-lg px-3 py-1.5 text-xs text-white"
+                        />
+                      </div>
+                      <div>
+                        <label className="text-[10px] text-neutral-500 block mb-1">Gradient (Tailwind classes)</label>
+                        <input type="text" value={card.accent}
+                          onChange={(e) => {
+                            const next = [...(siteSettingsForm.aboutCarousel ?? arr)];
+                            next[idx] = { ...next[idx], accent: e.target.value };
+                            setSiteSettingsForm({ ...siteSettingsForm, aboutCarousel: next });
+                          }}
+                          placeholder="from-[#0f1a0f] to-neutral-900"
+                          className="w-full bg-[#1a1a1a] border border-white/10 rounded-lg px-3 py-1.5 text-xs text-white font-mono"
+                        />
+                      </div>
+
+                      {/* Card Image Upload */}
+                      <div>
+                        <label className="text-[10px] text-neutral-500 block mb-1">Card Image</label>
+                        <div className="flex items-center gap-3">
+                          {card.image && (
+                            <img src={card.image} alt="preview" className="w-14 h-14 rounded-lg object-cover border border-white/10 shrink-0" />
+                          )}
+                          <label className="flex-1 flex items-center gap-2 px-3 py-2 bg-[#1a1a1a] border border-white/10 rounded-lg cursor-pointer hover:border-[#CCFF00]/40 transition-colors">
+                            <Upload className="w-3.5 h-3.5 text-neutral-400 shrink-0" />
+                            <span className="text-[11px] text-neutral-400 truncate">
+                              {card.image ? 'Change image' : 'Upload image'}
+                            </span>
+                            <input
+                              type="file"
+                              accept="image/*"
+                              className="hidden"
+                              onChange={async (e) => {
+                                const file = e.target.files?.[0];
+                                if (!file) return;
+                                try {
+                                  const url = await uploadFileToStorage(file, 'carousel');
+                                  const next = [...(siteSettingsForm.aboutCarousel ?? arr)];
+                                  next[idx] = { ...next[idx], image: url };
+                                  setSiteSettingsForm({ ...siteSettingsForm, aboutCarousel: next });
+                                } catch {
+                                  const url = await compressImageToDataURL(file);
+                                  const next = [...(siteSettingsForm.aboutCarousel ?? arr)];
+                                  next[idx] = { ...next[idx], image: url };
+                                  setSiteSettingsForm({ ...siteSettingsForm, aboutCarousel: next });
+                                }
+                                e.target.value = '';
+                              }}
+                            />
+                          </label>
+                          {card.image && (
+                            <button
+                              type="button"
+                              onClick={() => {
+                                const next = [...(siteSettingsForm.aboutCarousel ?? arr)];
+                                next[idx] = { ...next[idx], image: undefined };
+                                setSiteSettingsForm({ ...siteSettingsForm, aboutCarousel: next });
+                              }}
+                              className="text-red-400 hover:text-red-300 transition-colors shrink-0"
+                            >
+                              <X className="w-3.5 h-3.5" />
+                            </button>
+                          )}
+                        </div>
+                      </div>
+
+                    </div>
+                  ))}
+                </div>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    const existing = siteSettingsForm.aboutCarousel ?? [];
+                    setSiteSettingsForm({
+                      ...siteSettingsForm,
+                      aboutCarousel: [...existing, { id: `ac_${Date.now()}`, tag: `${existing.length + 1} • NEW`, label: 'NEW', title: 'Add your headline here.', accent: 'from-neutral-900 to-[#111]' }]
+                    });
+                  }}
+                  className="flex items-center gap-2 px-4 py-2 rounded-xl border border-dashed border-white/20 text-[11px] text-neutral-400 hover:border-[#CCFF00]/50 hover:text-[#CCFF00] transition-colors w-full justify-center"
+                >
+                  <Plus className="w-3.5 h-3.5" />
+                  <span>Add Carousel Card</span>
+                </button>
               </div>
 
               <div className="pt-2">

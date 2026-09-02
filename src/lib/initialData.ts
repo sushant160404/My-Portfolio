@@ -7,7 +7,8 @@ import {
   Certificate,
   Blog,
   Testimonial,
-  SiteSettings
+  SiteSettings,
+  AboutCarouselCard
 } from '../types';
 
 export const INITIAL_SETTINGS: SiteSettings = {
@@ -47,12 +48,19 @@ export const INITIAL_SETTINGS: SiteSettings = {
     borderRadius: 'rounded',
     glowEffect: true
   },
+  aboutCarousel: [
+    { id: 'ac1', tag: '1 • PROJECTS', title: 'End-to-end products, built with precision.', label: 'LIVE SESSION', accent: 'from-[#0f1a0f] to-neutral-900' },
+    { id: 'ac2', tag: '2 • UI/UX DESIGN', title: 'Interfaces that feel intuitive, look stunning.', label: 'FEATURED', accent: 'from-[#0a0f1a] to-neutral-900' },
+    { id: 'ac3', tag: '3 • WEB DEVELOPMENT', title: 'Fast, scalable, and production-ready web apps.', label: 'IN PROGRESS', accent: 'from-[#1a0f0a] to-neutral-900' },
+    { id: 'ac4', tag: '4 • BRANDING', title: 'Identity systems that leave a lasting impression.', label: 'COMPLETED', accent: 'from-neutral-900 to-[#111]' },
+    { id: 'ac5', tag: '5 • CONSULTING', title: 'Strategy and direction for your digital growth.', label: 'AVAILABLE', accent: 'from-[#0f0f1a] to-neutral-900' },
+  ],
   groqApiKey: '',
   groqModel: 'llama-3.3-70b-versatile',
   chatbotEnabled: true,
   chatbotName: 'Sift AI Assistant',
   chatbotGreeting: 'Hello! I am Sushant\'s AI Portfolio Assistant. How can I help you today? Ask me about Sushant\'s skills, projects, UI/UX services, or hiring availability!',
-  chatbotSystemPrompt: 'You are the official AI Portfolio Assistant for Sushant Namurte (Sift Media). You are helpful, professional, friendly, and knowledgeable. Answer questions accurately based on Sushant\'s portfolio details (services, projects, skills, contact info). Keep responses clear, concise, and beautifully formatted.'
+  chatbotSystemPrompt: 'You are the official AI Portfolio Assistant for Sushant Namurte (Sift Media). You are helpful, professional, friendly, and knowledgeable. Answer questions accurately based on Sushant\'s portfolio details (services, projects, skills, contact info). Keep responses clear, concise, and beautifully formatted.',
 };
 
 export const INITIAL_SERVICES: Service[] = [
